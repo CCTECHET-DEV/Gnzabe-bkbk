@@ -26,4 +26,9 @@ export interface ICompany extends Document {
 
   createdAt: Date;
   updatedAt: Date;
+
+  isPasswordCorrect(
+    candidatePassword: string,
+    userPassword: string,
+  ): Promise<boolean>;
 }

@@ -4,6 +4,7 @@ import { AuthService } from '../services/auth.service';
 import { AppError } from '../utilities/appError';
 import { catchAsync } from '../utilities/catchAsync';
 import { Document, Model } from 'mongoose';
+import { IUser } from '../interfaces/userInterface';
 
 export function createAuthController<T extends { password?: string }>(
   Model: any,
@@ -78,7 +79,7 @@ export function createAuthController<T extends { password?: string }>(
 
 const createSignupController = <T extends Document>(
   Model: Model<T>,
-  allowedFields?: string[], // fields to include
+  allowedFields?: string[],
 ): RequestHandler =>
   catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     let filteredBody = req.body;
@@ -103,6 +104,29 @@ const createSignupController = <T extends Document>(
       },
     });
   });
+const createLoginController = <T extends Document>(
+  Model: Model<IUser>,
+): RequestHandler =>
+  catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const { email, password } = req.body;
+    if (!email || !password)
+      return next(new AppError('Please provide email and password', 400));
+
+    const document = await Model.findOne({ email }).select('+password');
+    if (
+      !document ||
+      !(await document.isPasswordCorrect(password, document.password))
+    )
+      return next(new AppError('Incorrect email or password', 401));
+
+    //  NOTE check if the documet is active verified or not
+
+    const token = signToken((document._id as string).toString());
+    res
+      .status(200)
+      .cookie('jwt', token, cookieOptions(req))
+      .json({ status: 'success', token, data: { document } });
+  });
 
 function cookieOptions(req: Request) {
   return {
@@ -123,5 +147,6 @@ function signToken(id: string): string {
 }
 const factory = {
   createSignupController,
+  createLoginController,
 };
 export default factory;
