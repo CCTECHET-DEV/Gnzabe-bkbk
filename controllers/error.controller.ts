@@ -3,6 +3,7 @@ import { Error as MongooseError } from 'mongoose';
 import { MongoServerError } from 'mongodb';
 import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
 import { AppError } from '../utilities/appError';
+import { send } from 'process';
 
 const handleCastErrorDB = (error: MongooseError.CastError) => {
   const message = `Invalid ${error.path}: ${error.value}`;
@@ -75,7 +76,6 @@ const globalErrorHandler = (
     error.statusCode = error.statusCode || 500;
     error.status = error.status || 'error';
   }
-  console.log(error, 'error');
   if (process.env.NODE_ENV === 'development') sendErrorDev(error, req, res);
   else if (
     process.env.NODE_ENV === 'production' ||
@@ -86,6 +86,7 @@ const globalErrorHandler = (
     //   error.name,
     //   error instanceof MongooseError.ValidationError,
     // );
+
     let err = Object.assign({}, error);
     err.message = error.message;
     if (error instanceof MongooseError.CastError)
@@ -102,7 +103,8 @@ const globalErrorHandler = (
     if (error.name === 'JsonWebTokenError') err = handleJWTError(error);
     if (error.name === 'TokenExpiredError') err = handleJWTExpiredError(error);
 
-    sendErrorPro(err, req, res);
+    if (error instanceof AppError) sendErrorPro(error, req, res);
+    else sendErrorPro(err, req, res);
   }
 };
 
