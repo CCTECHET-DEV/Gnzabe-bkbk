@@ -1,4 +1,4 @@
-import { Document, Types } from "mongoose";
+import { Document, Types } from 'mongoose';
 
 export interface ICompany extends Document {
   companyName: string;
@@ -20,8 +20,8 @@ export interface ICompany extends Document {
   departments: Types.ObjectId[]; // References to Department documents
 
   preferences: {
-    theme: "light" | "dark";
-    language: "am" | "en" | "om" | "tg";
+    theme: 'light' | 'dark';
+    language: 'am' | 'en' | 'om' | 'tg';
   };
 
   createdAt: Date;

@@ -1,56 +1,8 @@
-import { Document, Types, Schema, model } from "mongoose";
+import { Types, Schema, model, Model } from 'mongoose';
+import bcrypt from 'bcryptjs';
+import { IUser } from '../interfaces/userInterface';
 
-export interface IUser extends Document {
-  fullName: string;
-  email: string;
-  phoneNumber: string;
-  password: string;
-  role: "employee" | "departmentAdmin";
-  companyId: string;
-  departmentId: string;
-  isApproved: boolean;
-  isVerified: boolean;
-  verificationToken?: string;
-  verificationTokenExpiry?: Date;
-  failedLoginAttempts: number;
-  isActive: boolean;
-  resetPasswordToken?: string;
-  resetPasswordTokenExpiry?: Date;
-  assignedCourses: Types.ObjectId[];
-  progress: {
-    [courseId: string]: {
-      completed: boolean;
-      score?: number;
-      lastAccessed?: Date;
-    };
-  };
-  certifications: {
-    courseId: Types.ObjectId;
-    certificateUrl: string;
-    awardedAt: Date;
-  }[];
-  badges: {
-    badgeId: Types.ObjectId;
-    awardedAt: Date;
-  }[];
-  examResults: {
-    courseId: Types.ObjectId;
-    quizScores: number[];
-    simulationScores: number[];
-  }[];
-
-  // DepartmentAdmin-only fields
-  managedEmployees?: Types.ObjectId[];
-  preferences: {
-    theme: "light" | "dark";
-    language: "am" | "en" | "om" | "tg";
-  };
-
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-const UserSchema = new Schema<IUser>(
+const userSchema = new Schema<IUser>(
   {
     fullName: {
       type: String,
@@ -76,20 +28,39 @@ const UserSchema = new Schema<IUser>(
       required: true,
       minlength: 8,
     },
+    passwordConfirm: {
+      type: String,
+      required: true,
+      minLegth: 8,
+      validate: {
+        validator: function (value: string) {
+          return value === this.password;
+        },
+        message: 'Password confirmation does not match password',
+      },
+    },
+    passwordChangedAt: Date,
+    photo: {
+      type: String,
+      required: true,
+      default: 'default.jpg',
+    },
+
     role: {
       type: String,
-      enum: ["employee", "departmentAdmin"],
+      enum: ['employee', 'departmentAdmin'],
+      default: 'employee',
       required: true,
     },
     companyId: {
       type: String,
       required: true,
-      ref: "Company",
+      ref: 'Company',
     },
     departmentId: {
       type: String,
       required: true,
-      ref: "Department",
+      ref: 'Department',
     },
     isVerified: {
       type: Boolean,
@@ -118,7 +89,7 @@ const UserSchema = new Schema<IUser>(
     isApproved: {
       type: Boolean,
     },
-    assignedCourses: [{ type: Types.ObjectId, ref: "Course" }],
+    assignedCourses: [{ type: Types.ObjectId, ref: 'Course' }],
     progress: {
       type: Map,
       of: new Schema(
@@ -127,12 +98,12 @@ const UserSchema = new Schema<IUser>(
           score: { type: Number },
           lastAccessed: { type: Date },
         },
-        { _id: false }
+        { _id: false },
       ),
     },
     certifications: [
       {
-        courseId: { type: Types.ObjectId, ref: "Course" },
+        courseId: { type: Types.ObjectId, ref: 'Course' },
         certificateUrl: String,
         awardedAt: Date,
       },
@@ -149,7 +120,7 @@ const UserSchema = new Schema<IUser>(
       {
         courseId: {
           type: Types.ObjectId,
-          ref: "Course",
+          ref: 'Course',
         },
         quizScores: [Number],
         simulationScores: [Number],
@@ -158,19 +129,19 @@ const UserSchema = new Schema<IUser>(
     managedEmployees: [
       {
         type: Types.ObjectId,
-        ref: "User",
+        ref: 'User',
       },
     ],
     preferences: {
       theme: {
         type: String,
-        enum: ["light", "dark"],
-        default: "light",
+        enum: ['light', 'dark'],
+        default: 'light',
       },
       language: {
         type: String,
-        enum: ["am", "en", "om", "tg"],
-        default: "am",
+        enum: ['am', 'en', 'om', 'tg'],
+        default: 'am',
       },
     },
     createdAt: { type: Date, default: Date.now },
@@ -179,7 +150,45 @@ const UserSchema = new Schema<IUser>(
   {
     toObject: { virtuals: true },
     toJSON: { virtuals: true },
-  }
+  },
 );
 
-export default model<IUser>("User", UserSchema);
+userSchema.pre('save', async function (this: IUser, next) {
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(this.password, 8);
+  this.passwordConfirm = undefined;
+  next();
+});
+
+userSchema.pre(
+  'save',
+  function (
+    this: IUser & {
+      passwordChangedAt: Date;
+      isModified: (field: string) => boolean;
+    },
+    next,
+  ) {
+    if (!this.isModified('password') || this.isNew) return next();
+    this.passwordChangedAt = new Date(Date.now() - 1000);
+    next();
+  },
+);
+
+userSchema.methods.passwordChangedAfter = function (
+  JWTTimeStamp: number,
+): boolean {
+  if (!this.passwordChangedAt) return false;
+  const passwordChangedAtStamp = this.passwordChangedAt.getTime() / 1000;
+  return passwordChangedAtStamp > JWTTimeStamp;
+};
+
+userSchema.methods.isPasswordCorrect = async function (
+  candidatePassword: string,
+  userPassword: string,
+): Promise<boolean> {
+  return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+const User: Model<IUser> = model<IUser>('User', userSchema);
+export default User;

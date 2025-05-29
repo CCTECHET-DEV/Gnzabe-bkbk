@@ -1,5 +1,5 @@
-import { Types, Schema, model } from "mongoose";
-import { ICompany } from "../middlewares/companyInterface";
+import { Types, Schema, model } from 'mongoose';
+import { ICompany } from '../interfaces/companyInterface';
 
 const CompanySchema = new Schema<ICompany>(
   {
@@ -63,20 +63,20 @@ const CompanySchema = new Schema<ICompany>(
     departments: [
       {
         type: Schema.Types.ObjectId,
-        ref: "Department",
+        ref: 'Department',
       },
     ],
 
     preferences: {
       theme: {
         type: String,
-        enum: ["light", "dark"],
-        default: "light",
+        enum: ['light', 'dark'],
+        default: 'light',
       },
       language: {
         type: String,
-        enum: ["am", "en", "om", "tg"],
-        default: "am",
+        enum: ['am', 'en', 'om', 'tg'],
+        default: 'am',
       },
     },
   },
@@ -86,4 +86,4 @@ const CompanySchema = new Schema<ICompany>(
   },
 );
 
-export const Company = model<ICompany>("Company", CompanySchema);
+export const Company = model<ICompany>('Company', CompanySchema);

@@ -12,7 +12,7 @@ const handleCastErrorDB = (error: MongooseError.CastError) => {
 const handleDuplicateFieldsDB = (error: MongoServerError) => {
   const match = error.errmsg.match(/(["'])(\\?.)*?\1/);
   const value = match ? match[0] : '';
-  const message = `duplicate field value: ${value}. Please use another value`;
+  const message = `This value: ${value} has already been taken. Please use another value!`;
   return new AppError(message, 400);
 };
 
@@ -46,7 +46,7 @@ const sendErrorDev = (error: Error | AppError, req: Request, res: Response) => {
 };
 
 const sendErrorPro = (error: Error | AppError, req: Request, res: Response) => {
-  console.log(error);
+  // console.log(error);
   if (error instanceof AppError)
     return res.status(error.statusCode).json({
       status: error.status,
@@ -81,6 +81,11 @@ const globalErrorHandler = (
     process.env.NODE_ENV === 'production' ||
     process.env.NODE_ENV === 'test'
   ) {
+    // console.log(
+    //   'production error',
+    //   error.name,
+    //   error instanceof MongooseError.ValidationError,
+    // );
     let err = Object.assign({}, error);
     err.message = error.message;
     if (error instanceof MongooseError.CastError)
@@ -92,7 +97,7 @@ const globalErrorHandler = (
     )
       err = handleDuplicateFieldsDB(error);
     if (error instanceof MongooseError.ValidationError)
-      error = handleValidationErrorDB(error);
+      err = handleValidationErrorDB(error);
 
     if (error.name === 'JsonWebTokenError') err = handleJWTError(error);
     if (error.name === 'TokenExpiredError') err = handleJWTExpiredError(error);

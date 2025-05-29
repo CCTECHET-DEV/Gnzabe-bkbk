@@ -8,11 +8,14 @@ import path from 'path';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import mongoSanitize from 'express-mongo-sanitize';
+import userRouter from './routes/user.routes';
+import authRouter from './routes/auth.routes';
+
 // import companyRouter from './routes/companyRoutes';
 // import courseRouter from './routes/courseRoutes';
 // import TutorialRouter from './routes/tutorialRoutes';
 // import QuizRouter from './routes/quizRoutes';
-import globalErrorHandler from './controllers/errorController';
+import globalErrorHandler from './controllers/error.controller';
 import { sanitizeInputs } from './middlewares/middlewares';
 
 const allowedOrigins = [
@@ -37,28 +40,14 @@ app.use('/videos', express.static(path.resolve(__dirname, '../public/videos')));
 
 app.use(express.json());
 
-// app.use(
-//   cors({
-//     origin: function (origin, callback) {
-//       if (!origin || allowedOrigins.includes(origin)) {
-//         callback(null, true); // allow
-//       } else {
-//         callback(new Error('Not allowed by CORS')); // block
-//       }
-//     },
-//     credentials: true,
-//   }),
-// );
-
 app.use(
   cors({
     origin: function (origin, callback) {
       if (!origin) {
-        // If no origin (e.g., server-to-server requests), you can decide to allow or block.
         return callback(null, false);
       }
       if (allowedOrigins.includes(origin)) {
-        return callback(null, origin); // 👈 return the actual origin, NOT true
+        return callback(null, origin);
       } else {
         return callback(new Error('Not allowed by CORS'));
       }
@@ -71,7 +60,7 @@ app.use(helmet());
 app.use((req, res, next) => {
   mongoSanitize.sanitize(req.body);
   mongoSanitize.sanitize(req.params);
-  mongoSanitize.sanitize(req.query); // this will mutate the object without overwriting
+  mongoSanitize.sanitize(req.query);
   next();
 });
 app.use(sanitizeInputs);
@@ -91,7 +80,9 @@ app.use(
   }),
 );
 
-// app.use('/api/v1/companies', companyRouter);
+app.use('/api/v1/users', userRouter);
+app.use('/api/v1/authentication', authRouter);
+
 // app.use('/api/v1/courses', courseRouter);
 // app.use('/api/v1/tutorials', TutorialRouter);
 // app.use('/api/v1/quizzes', QuizRouter);
