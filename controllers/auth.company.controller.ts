@@ -19,3 +19,5 @@ export const loginCompany = authFactory.createLoginController<ICompany>(
   ['primaryEmail', 'password'],
   ['primaryEmail'],
 );
+
+export const logoutCompany = authFactory.createLogoutController();

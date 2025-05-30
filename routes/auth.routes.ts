@@ -1,9 +1,14 @@
 import express from 'express';
-import { loginUser, signupUser } from '../controllers/auth.user.controller';
+import {
+  loginUser,
+  logoutUser,
+  signupUser,
+} from '../controllers/auth.user.controller';
 import { verifyEmails } from '../middlewares/verifyEmail.middleware';
 import { requireBodyFields } from '../middlewares/validateFields.middleware';
 import {
   loginCompany,
+  logoutCompany,
   signupCompany,
 } from '../controllers/auth.company.controller';
 
@@ -18,12 +23,17 @@ router
   .route('/user/login')
   .post(requireBodyFields(['email', 'password']), loginUser);
 
+router.route('/user/logout').post(logoutUser);
+
 // NOTE compay authentication routes
 router.route('/company/signup').post(
   // verifyEmails(['primaryEmail', 'secondaryEmail']),
   signupCompany,
 );
+
 router
   .route('/company/login')
   .post(requireBodyFields(['primaryEmail', 'password']), loginCompany);
+
+router.route('/company/logout').post(logoutCompany);
 export default router;

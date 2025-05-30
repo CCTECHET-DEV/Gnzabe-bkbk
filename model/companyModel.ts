@@ -146,4 +146,12 @@ companySchema.methods.isPasswordCorrect = async function (
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
+companySchema.methods.passwordChangedAfter = function (
+  JWTTimeStamp: number,
+): boolean {
+  if (!this.passwordChangedAt) return false;
+  const passwordChangedAtStamp = this.passwordChangedAt.getTime() / 1000;
+  return passwordChangedAtStamp > JWTTimeStamp;
+};
+
 export const Company = model<ICompany>('Company', companySchema);

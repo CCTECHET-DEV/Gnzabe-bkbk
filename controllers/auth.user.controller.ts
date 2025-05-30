@@ -17,3 +17,5 @@ export const loginUser = authFactory.createLoginController<IUser>(
   ['email', 'password'],
   ['email'],
 );
+
+export const logoutUser = authFactory.createLogoutController();

@@ -35,4 +35,6 @@ export interface ICompany extends IAuthDocument {
     candidatePassword: string,
     userPassword: string,
   ): Promise<boolean>;
+
+  passwordChangedAfter(JWTTimeStamp: number): boolean;
 }

@@ -199,5 +199,13 @@ userSchema.methods.isPasswordCorrect = async function (
   return await bcrypt.compare(candidatePassword, userPassword);
 };
 
+userSchema.methods.passwordChangedAfter = function (
+  JWTTimeStamp: number,
+): boolean {
+  if (!this.passwordChangedAt) return false;
+  const passwordChangedAtStamp = this.passwordChangedAt.getTime() / 1000;
+  return passwordChangedAtStamp > JWTTimeStamp;
+};
+
 const User: Model<IUser> = model<IUser>('User', userSchema);
 export default User;

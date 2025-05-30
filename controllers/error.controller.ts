@@ -72,6 +72,7 @@ const globalErrorHandler = (
   res: Response,
   next: NextFunction,
 ) => {
+  console.log(error);
   if (error instanceof AppError) {
     error.statusCode = error.statusCode || 500;
     error.status = error.status || 'error';
