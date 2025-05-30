@@ -6,6 +6,9 @@ export interface ICompany extends Document {
   secondaryEmail?: string;
   phoneNumber: string;
   password: string;
+  passwordConfirm?: string;
+  passwordChangedAt?: Date;
+  logo?: string;
 
   isVerified: boolean;
   verificationToken?: string;

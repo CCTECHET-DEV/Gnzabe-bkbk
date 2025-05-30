@@ -76,6 +76,8 @@ const userSchema = new Schema<IUser>(
     failedLoginAttempts: {
       type: Number,
       default: 0,
+      max: 5,
+      min: 0,
     },
     isActive: {
       type: Boolean,

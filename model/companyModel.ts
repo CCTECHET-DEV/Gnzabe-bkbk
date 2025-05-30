@@ -1,7 +1,8 @@
 import { Schema, model } from 'mongoose';
+import bcrypt from 'bcryptjs';
 import { ICompany } from '../interfaces/companyInterface';
 
-const CompanySchema = new Schema<ICompany>(
+const companySchema = new Schema<ICompany>(
   {
     name: {
       type: String,
@@ -31,12 +32,29 @@ const CompanySchema = new Schema<ICompany>(
       unique: true,
       match: /^\+?[1-9]\d{1,14}$/, // E.164 format
     },
-
+    logo: {
+      type: String,
+      default: 'default-logo.png', // Default logo if not provided
+    },
     password: {
       type: String,
       required: true,
+      minlength: 8,
+      select: false, // Exclude password from queries by default
     },
-
+    passwordConfirm: {
+      type: String,
+      required: true,
+      minlength: 8,
+      select: false,
+      validate: {
+        validator: function (this: ICompany, value: string) {
+          return value === this.password;
+        },
+        message: 'Password confirmation does not match password',
+      },
+    },
+    passwordChangedAt: Date,
     isVerified: {
       type: Boolean,
       default: false,
@@ -51,6 +69,8 @@ const CompanySchema = new Schema<ICompany>(
     failedLoginAttempts: {
       type: Number,
       default: 0,
+      max: 5,
+      min: 0,
     },
     isActive: {
       type: Boolean,
@@ -89,5 +109,33 @@ const CompanySchema = new Schema<ICompany>(
     toJSON: { virtuals: true },
   },
 );
+companySchema.pre('save', async function (this: ICompany, next) {
+  if (!this.isModified('password')) return next();
+  this.password = await bcrypt.hash(this.password, 8);
+  this.passwordConfirm = undefined;
+  next();
+});
 
-export const Company = model<ICompany>('Company', CompanySchema);
+companySchema.pre(
+  'save',
+  function (
+    this: ICompany & {
+      passwordChangedAt: Date;
+      isModified: (field: string) => boolean;
+    },
+    next,
+  ) {
+    if (!this.isModified('password') || this.isNew) return next();
+    this.passwordChangedAt = new Date(Date.now() - 1000);
+    next();
+  },
+);
+
+companySchema.methods.isPasswordCorrect = async function (
+  candidatePassword: string,
+  userPassword: string,
+): Promise<boolean> {
+  return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+export const Company = model<ICompany>('Company', companySchema);
