@@ -8,19 +8,52 @@ import { IAuthDocument } from '../interfaces/authInterface';
 interface SignupControllerOptions {
   allowedFields?: string[];
   emailField: string;
-  sendVerificationEmail?: (email: string, userId: string) => Promise<void>;
+  nameField?: string;
+  sendVerificationEmail?: (
+    email: string,
+    userId: string,
+    name?: string,
+  ) => Promise<void>;
 }
+
+// const createSignupController = <T extends Document>(
+//   Model: Model<T>,
+//   allowedFields?: string[],
+// ): RequestHandler =>
+//   catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+//     let filteredBody = req.body;
+
+//     if (allowedFields?.length) {
+//       filteredBody = Object.fromEntries(
+//         allowedFields
+//           .filter((key) => key in req.body)
+//           .map((key) => [key, req.body[key]]),
+//       );
+//     }
+
+//     const document = await Model.create(filteredBody);
+//     const token = signToken((document._id as string).toString());
+
+//     res.cookie('jwt', token, cookieOptions(req));
+//     res.status(201).json({
+//       status: 'success',
+//       token,
+//       data: {
+//         document,
+//       },
+//     });
+//   });
 
 const createSignupController = <T extends Document>(
   Model: Model<T>,
-  allowedFields?: string[],
+  options: SignupControllerOptions,
 ): RequestHandler =>
   catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     let filteredBody = req.body;
 
-    if (allowedFields?.length) {
+    if (options.allowedFields?.length) {
       filteredBody = Object.fromEntries(
-        allowedFields
+        options.allowedFields
           .filter((key) => key in req.body)
           .map((key) => [key, req.body[key]]),
       );
@@ -28,6 +61,20 @@ const createSignupController = <T extends Document>(
 
     const document = await Model.create(filteredBody);
     const token = signToken((document._id as string).toString());
+
+    // Send verification email if provided
+    if (options.sendVerificationEmail) {
+      const email = (document as any)[options.emailField];
+      const name = options.nameField
+        ? (document as any)[options.nameField]
+        : undefined;
+
+      await options.sendVerificationEmail(
+        email,
+        (document._id as string).toString(),
+        name,
+      );
+    }
 
     res.cookie('jwt', token, cookieOptions(req));
     res.status(201).json({
