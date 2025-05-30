@@ -1,11 +1,8 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import Jwt from 'jsonwebtoken';
-import { AuthService } from '../services/auth.service';
 import { AppError } from '../utilities/appError';
 import { catchAsync } from '../utilities/catchAsync';
 import { Document, Model } from 'mongoose';
-import { IUser } from '../interfaces/userInterface';
-import { ICompany } from '../interfaces/companyInterface';
 import { IAuthDocument } from '../interfaces/authInterface';
 
 const createSignupController = <T extends Document>(
