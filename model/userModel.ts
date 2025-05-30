@@ -147,8 +147,14 @@ const userSchema = new Schema<IUser>(
         default: 'am',
       },
     },
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
+    updatedAt: {
+      type: Date,
+      default: Date.now,
+    },
   },
   {
     toObject: { virtuals: true },

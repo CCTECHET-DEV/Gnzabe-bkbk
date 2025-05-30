@@ -19,7 +19,6 @@ router
   .post(requireBodyFields(['email', 'password']), loginUser);
 
 // NOTE compay authentication routes
-
 router.route('/company/signup').post(
   // verifyEmails(['primaryEmail', 'secondaryEmail']),
   signupCompany,

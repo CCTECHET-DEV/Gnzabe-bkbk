@@ -103,6 +103,14 @@ const companySchema = new Schema<ICompany>(
         default: 'am',
       },
     },
+    updatedAt: {
+      type: Date,
+      default: Date.now,
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
   },
   {
     toObject: { virtuals: true },
