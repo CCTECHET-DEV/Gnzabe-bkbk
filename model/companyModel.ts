@@ -1,9 +1,13 @@
-import { Types, Schema, model } from 'mongoose';
+import { Schema, model } from 'mongoose';
 import { ICompany } from '../interfaces/companyInterface';
 
 const CompanySchema = new Schema<ICompany>(
   {
-    companyName: { type: String, required: true, trim: true },
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+    },
 
     primaryEmail: {
       type: String,

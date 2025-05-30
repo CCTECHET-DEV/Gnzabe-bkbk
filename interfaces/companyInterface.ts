@@ -1,7 +1,7 @@
 import { Document, Types } from 'mongoose';
 
 export interface ICompany extends Document {
-  companyName: string;
+  name: string;
   primaryEmail: string;
   secondaryEmail?: string;
   phoneNumber: string;

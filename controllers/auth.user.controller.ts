@@ -12,4 +12,8 @@ export const signupUser = authFactory.createSignupController<IUser>(User, [
   'departmentId',
 ]);
 
-export const loginUser = authFactory.createLoginController<IUser>(User);
+export const loginUser = authFactory.createLoginController<IUser>(
+  User,
+  ['email', 'password'],
+  ['email'],
+);

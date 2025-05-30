@@ -104,23 +104,79 @@ const createSignupController = <T extends Document>(
       },
     });
   });
+
+// const createLoginController = <T extends Document>(
+//   Model: Model<IUser>,
+//   requiredFields: string[],
+//   findBy: string[],
+// ): RequestHandler =>
+//   catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+//     const { email, password } = req.body;
+//     if (!email || !password)
+//       return next(new AppError('Please provide email and password', 400));
+
+//     const document = await Model.findOne({ email }).select('+password');
+//     if (
+//       !document ||
+//       !(await document.isPasswordCorrect(password, document.password))
+//     )
+//       return next(new AppError('Incorrect email or password', 401));
+
+//     //  NOTE check if the documet is active verified or not
+
+//     const token = signToken((document._id as string).toString());
+//     res
+//       .status(200)
+//       .cookie('jwt', token, cookieOptions(req))
+//       .json({ status: 'success', token, data: { document } });
+//   });
+
 const createLoginController = <T extends Document>(
   Model: Model<IUser>,
+  requiredFields: string[],
+  findBy: string[],
 ): RequestHandler =>
   catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const { email, password } = req.body;
-    if (!email || !password)
-      return next(new AppError('Please provide email and password', 400));
+    // 1. Validate required fields
+    const missingFields = requiredFields.filter((field) => !req.body[field]);
+    if (missingFields.length > 0) {
+      return next(
+        new AppError(
+          `Missing required field(s): ${missingFields.join(', ')}`,
+          400,
+        ),
+      );
+    }
 
-    const document = await Model.findOne({ email }).select('+password');
+    // 2. Build dynamic query filter from findBy array
+    const filter: Record<string, any> = {};
+    for (const key of findBy) {
+      if (req.body[key]) {
+        filter[key] = req.body[key];
+      }
+    }
+
+    if (Object.keys(filter).length === 0) {
+      return next(
+        new AppError(
+          `At least one valid identifier is required: ${findBy.join(', ')}`,
+          400,
+        ),
+      );
+    }
+
+    // 3. Fetch document by filter
+    const document = await Model.findOne(filter).select('+password');
+    const password = req.body.password;
+
     if (
       !document ||
       !(await document.isPasswordCorrect(password, document.password))
-    )
-      return next(new AppError('Incorrect email or password', 401));
+    ) {
+      return next(new AppError('Incorrect credentials', 401));
+    }
 
-    //  NOTE check if the documet is active verified or not
-
+    // 4. Generate token
     const token = signToken((document._id as string).toString());
     res
       .status(200)

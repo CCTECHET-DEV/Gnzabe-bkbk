@@ -10,7 +10,6 @@ export function requireBodyFields(requiredFields: string[]): RequestHandler {
         req.body[key] === undefined ||
         (typeof req.body[key] === 'string' && req.body[key].trim() === ''),
     );
-
     if (missing.length > 0) {
       return next(
         new AppError(
