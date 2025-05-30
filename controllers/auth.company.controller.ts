@@ -13,3 +13,9 @@ export const signupCompany = authFactory.createSignupController<ICompany>(
     'passwordConfirm',
   ],
 );
+
+export const loginCompany = authFactory.createLoginController<ICompany>(
+  Company,
+  ['primaryEmail', 'password'],
+  ['primaryEmail'],
+);

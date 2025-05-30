@@ -5,56 +5,58 @@ import { AppError } from '../utilities/appError';
 import { catchAsync } from '../utilities/catchAsync';
 import { Document, Model } from 'mongoose';
 import { IUser } from '../interfaces/userInterface';
+import { ICompany } from '../interfaces/companyInterface';
+import { IAuthDocument } from '../interfaces/authInterface';
 
-export function createAuthController<T extends { password?: string }>(
-  Model: any,
-) {
-  const service = new AuthService(Model);
+// export function createAuthController<T extends { password?: string }>(
+//   Model: any,
+// ) {
+//   const service = new AuthService(Model);
 
-  return {
-    signup: catchAsync(
-      async (req: Request, res: Response, next: NextFunction) => {
-        const response = await service.signup(req.body);
-        res
-          .status(201)
-          .cookie('jwt', response.token, cookieOptions(req))
-          .json({
-            status: 'success',
-            token: response.token,
-            data: {
-              document: response.document,
-            },
-          });
-      },
-    ),
+//   return {
+//     signup: catchAsync(
+//       async (req: Request, res: Response, next: NextFunction) => {
+//         const response = await service.signup(req.body);
+//         res
+//           .status(201)
+//           .cookie('jwt', response.token, cookieOptions(req))
+//           .json({
+//             status: 'success',
+//             token: response.token,
+//             data: {
+//               document: response.document,
+//             },
+//           });
+//       },
+//     ),
 
-    // login: async (req: Request, res: Response, next: NextFunction) => {
-    //   try {
-    //     const { email, password } = req.body;
-    //     if (!email || !password)
-    //       return next(new AppError('Please provide email and password', 400));
+//     // login: async (req: Request, res: Response, next: NextFunction) => {
+//     //   try {
+//     //     const { email, password } = req.body;
+//     //     if (!email || !password)
+//     //       return next(new AppError('Please provide email and password', 400));
 
-    //     const token = await service.login(email, password);
-    //     res
-    //       .status(200)
-    //       .cookie('jwt', token, cookieOptions(req))
-    //       .json({ status: 'success', token });
-    //   } catch (err: any) {
-    //     next(new AppError(err.message, 401));
-    //   }
-    // },
+//     //     const token = await service.login(email, password);
+//     //     res
+//     //       .status(200)
+//     //       .cookie('jwt', token, cookieOptions(req))
+//     //       .json({ status: 'success', token });
+//     //   } catch (err: any) {
+//     //     next(new AppError(err.message, 401));
+//     //   }
+//     // },
 
-    logout: (req: Request, res: Response) => {
-      res
-        .cookie('jwt', 'loggedout', {
-          expires: new Date(Date.now() + 1_000),
-          httpOnly: true,
-        })
-        .status(200)
-        .json({ status: 'success', message: 'Logged out successfully' });
-    },
-  };
-}
+//     logout: (req: Request, res: Response) => {
+//       res
+//         .cookie('jwt', 'loggedout', {
+//           expires: new Date(Date.now() + 1_000),
+//           httpOnly: true,
+//         })
+//         .status(200)
+//         .json({ status: 'success', message: 'Logged out successfully' });
+//     },
+//   };
+// }
 // const createSingupController = <T extends Document>(
 //   Model: Model<T>,
 //   excludeFields?: string[],
@@ -131,8 +133,8 @@ const createSignupController = <T extends Document>(
 //       .json({ status: 'success', token, data: { document } });
 //   });
 
-const createLoginController = <T extends Document>(
-  Model: Model<IUser>,
+const createLoginController = <T extends IAuthDocument>(
+  Model: Model<T>,
   requiredFields: string[],
   findBy: string[],
 ): RequestHandler =>

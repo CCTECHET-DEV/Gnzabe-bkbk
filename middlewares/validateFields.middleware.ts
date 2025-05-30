@@ -20,6 +20,7 @@ export function requireBodyFields(requiredFields: string[]): RequestHandler {
         ),
       );
     }
+
     next();
   };
 }

@@ -1,6 +1,7 @@
 import { Document, Types } from 'mongoose';
+import { IAuthDocument } from './authInterface';
 
-export interface ICompany extends Document {
+export interface ICompany extends IAuthDocument {
   name: string;
   primaryEmail: string;
   secondaryEmail?: string;

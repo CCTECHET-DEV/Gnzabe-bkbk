@@ -1,6 +1,7 @@
 import { Document, Types } from 'mongoose';
+import { IAuthDocument } from './authInterface';
 
-export interface IUser extends Document {
+export interface IUser extends IAuthDocument {
   fullName: string;
   email: string;
   phoneNumber: string;

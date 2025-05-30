@@ -2,7 +2,10 @@ import express from 'express';
 import { loginUser, signupUser } from '../controllers/auth.user.controller';
 import { verifyEmails } from '../middlewares/verifyEmail.middleware';
 import { requireBodyFields } from '../middlewares/validateFields.middleware';
-import { signupCompany } from '../controllers/auth.company.controller';
+import {
+  loginCompany,
+  signupCompany,
+} from '../controllers/auth.company.controller';
 
 const router = express.Router();
 
@@ -21,4 +24,7 @@ router.route('/company/signup').post(
   // verifyEmails(['primaryEmail', 'secondaryEmail']),
   signupCompany,
 );
+router
+  .route('/company/login')
+  .post(requireBodyFields(['primaryEmail', 'password']), loginCompany);
 export default router;
