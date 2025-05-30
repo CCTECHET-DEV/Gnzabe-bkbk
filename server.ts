@@ -5,8 +5,10 @@ dotenv.config({
 
 import app from './app';
 import connectToDatabase from './config/dbConfig';
+import setupCronJobs from './jobs';
 
 connectToDatabase();
+setupCronJobs();
 
 process.on('uncaughtException', (error: Error) => {
   console.log('UncaughtException shutting down...');

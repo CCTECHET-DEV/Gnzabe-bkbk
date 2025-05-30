@@ -5,6 +5,12 @@ import { catchAsync } from '../utilities/catchAsync';
 import { Document, Model } from 'mongoose';
 import { IAuthDocument } from '../interfaces/authInterface';
 
+interface SignupControllerOptions {
+  allowedFields?: string[];
+  emailField: string;
+  sendVerificationEmail?: (email: string, userId: string) => Promise<void>;
+}
+
 const createSignupController = <T extends Document>(
   Model: Model<T>,
   allowedFields?: string[],
