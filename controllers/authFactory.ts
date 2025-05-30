@@ -10,6 +10,7 @@ interface SignupControllerOptions {
   emailField: string;
   nameField?: string;
   sendVerificationEmail?: (
+    req: Request,
     email: string,
     userId: string,
     name?: string,
@@ -70,6 +71,7 @@ const createSignupController = <T extends Document>(
         : undefined;
 
       await options.sendVerificationEmail(
+        req,
         email,
         (document._id as string).toString(),
         name,

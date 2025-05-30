@@ -1,9 +1,11 @@
+import { Request } from 'express';
 import * as brevo from '@getbrevo/brevo';
 import {
   verifySubject,
   verifyContent,
   verifySender,
 } from '../views/email/verifyComapnyEmaiil';
+import { removeLastPathSegment } from '../utilities/helper';
 
 // console.log(brevo, 'brevo');
 
@@ -60,14 +62,15 @@ export class EmailSender {
 }
 
 export const sendVerificationEmail = async (
+  req: Request,
   email: string,
   userId: string,
   name?: string,
 ): Promise<void> => {
-  const baseUrl = process.env.CLIENT_URL || 'https://your-frontend-url.com';
-  const token = encodeURIComponent(userId); // or a real token
-  const link = `${baseUrl}/verify?token=${token}`; // or whatever route you use
-
+  console.log(removeLastPathSegment(req.originalUrl), 'req.originalUrl');
+  const baseUrl = `${removeLastPathSegment(req.originalUrl)}`;
+  const token = encodeURIComponent(userId);
+  const link = `${baseUrl}/verify?token=${token}`;
   const mailer = new EmailSender({
     subject: verifySubject,
     sender: verifySender,
@@ -76,4 +79,5 @@ export const sendVerificationEmail = async (
   });
 
   await mailer.send();
+  console.log('Verification email sent to:', email);
 };

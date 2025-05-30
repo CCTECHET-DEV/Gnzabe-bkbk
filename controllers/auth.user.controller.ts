@@ -1,16 +1,24 @@
 import { IUser } from '../interfaces/userInterface';
 import User from '../model/userModel';
+import { sendVerificationEmail } from '../services/email.service';
 import authFactory from './authFactory';
 
-export const signupUser = authFactory.createSignupController<IUser>(User, [
-  'fullName',
-  'email',
-  'phoneNumber',
-  'password',
-  'passwordConfirm',
-  'companyId',
-  'departmentId',
-]);
+export const signupUser = authFactory.createSignupController<IUser>(User, {
+  allowedFields: [
+    'fullName',
+    'email',
+    'phoneNumber',
+    'password',
+    'passwordConfirm',
+    'companyId',
+    'departmentId',
+  ],
+  emailField: 'email',
+  nameField: 'fullName',
+  sendVerificationEmail: async (req, email, userId, name) => {
+    await sendVerificationEmail(req, email, userId, name);
+  },
+});
 
 export const loginUser = authFactory.createLoginController<IUser>(
   User,
