@@ -13,6 +13,7 @@ interface SignupControllerOptions {
     req: Request,
     email: string,
     userId: string,
+    verificationUrl: string,
     name?: string,
   ) => Promise<void>;
 }
@@ -62,6 +63,7 @@ const createSignupController = <T extends Document>(
 
     const document = await Model.create(filteredBody);
     const token = signToken((document._id as string).toString());
+    const verifcationUrl = `${req.protocol}`;
 
     // Send verification email if provided
     if (options.sendVerificationEmail) {
@@ -74,6 +76,7 @@ const createSignupController = <T extends Document>(
         req,
         email,
         (document._id as string).toString(),
+        verifcationUrl,
         name,
       );
     }

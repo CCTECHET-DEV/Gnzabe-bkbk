@@ -65,16 +65,16 @@ export const sendVerificationEmail = async (
   req: Request,
   email: string,
   userId: string,
+  verificationUrl: string,
   name?: string,
 ): Promise<void> => {
   console.log(removeLastPathSegment(req.originalUrl), 'req.originalUrl');
   const baseUrl = `${removeLastPathSegment(req.originalUrl)}`;
   const token = encodeURIComponent(userId);
-  const link = `${baseUrl}/verify?token=${token}`;
   const mailer = new EmailSender({
     subject: verifySubject,
     sender: verifySender,
-    htmlContent: verifyContent(link),
+    htmlContent: verifyContent(verificationUrl),
     to: [{ email, name }],
   });
 
