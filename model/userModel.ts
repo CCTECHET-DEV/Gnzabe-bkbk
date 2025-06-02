@@ -29,6 +29,15 @@ const userSchema = new Schema<IUser>(
       required: true,
       minlength: 8,
       select: false,
+      validate: {
+        validator: function (value: string) {
+          return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]).{8,}$/.test(
+            value,
+          );
+        },
+        message:
+          'Password must be at least 8 characters long and include at least one letter, one number, and one special character (e.g., !@#$%)',
+      },
     },
     passwordConfirm: {
       type: String,
@@ -218,7 +227,7 @@ userSchema.methods.createPasswordRestToken = function (): string {
   console.log(resetToken, resetToken);
   return resetToken;
 };
-userSchema.methods.createPasswordVerificationToken = function (): string {
+userSchema.methods.createVerificationToken = function (): string {
   const verificationToken = crypto.randomBytes(32).toString('hex');
   this.verificationToken = crypto
     .createHash('sha256')

@@ -19,7 +19,7 @@ export const signupUser = authFactory.createSignupController<IUser>(User, {
     await sendVerificationEmail(req, email, userId, token, name);
   },
 });
-
+export const verifyUser = authFactory.createVerificationController(User);
 export const loginUser = authFactory.createLoginController<IUser>(
   User,
   ['email', 'password'],

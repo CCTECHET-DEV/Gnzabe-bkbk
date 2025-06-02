@@ -3,6 +3,7 @@ import {
   loginUser,
   logoutUser,
   signupUser,
+  verifyUser,
 } from '../controllers/auth.user.controller';
 import { verifyEmails } from '../middlewares/verifyEmail.middleware';
 import { requireBodyFields } from '../middlewares/validateFields.middleware';
@@ -20,9 +21,12 @@ router.route('/user/signup').post(
   // verifyEmails(['email']),
   signupUser,
 );
+
 router
   .route('/user/login')
   .post(requireBodyFields(['email', 'password']), loginUser);
+
+router.route('/user/verify').get(verifyUser);
 
 router.route('/user/logout').post(logoutUser);
 
