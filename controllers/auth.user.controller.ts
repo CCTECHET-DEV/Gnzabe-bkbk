@@ -15,8 +15,8 @@ export const signupUser = authFactory.createSignupController<IUser>(User, {
   ],
   emailField: 'email',
   nameField: 'fullName',
-  sendVerificationEmail: async (req, email, userId, verificationUrl, name) => {
-    await sendVerificationEmail(req, email, userId, verificationUrl, name);
+  sendVerificationEmail: async (req, email, userId, token, name) => {
+    await sendVerificationEmail(req, email, userId, token, name);
   },
 });
 

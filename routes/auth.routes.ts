@@ -10,6 +10,7 @@ import {
   loginCompany,
   logoutCompany,
   signupCompany,
+  verifyCompany,
 } from '../controllers/auth.company.controller';
 
 const router = express.Router();
@@ -34,6 +35,8 @@ router.route('/company/signup').post(
 router
   .route('/company/login')
   .post(requireBodyFields(['primaryEmail', 'password']), loginCompany);
+
+router.route('/company/verify').get(verifyCompany);
 
 router.route('/company/logout').post(logoutCompany);
 export default router;

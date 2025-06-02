@@ -1,5 +1,6 @@
 import { Types, Schema, model, Model } from 'mongoose';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { IUser } from '../interfaces/userInterface';
 
 const userSchema = new Schema<IUser>(
@@ -205,6 +206,27 @@ userSchema.methods.passwordChangedAfter = function (
   if (!this.passwordChangedAt) return false;
   const passwordChangedAtStamp = this.passwordChangedAt.getTime() / 1000;
   return passwordChangedAtStamp > JWTTimeStamp;
+};
+
+userSchema.methods.createPasswordRestToken = function (): string {
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  this.resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+  this.resetPasswordTokenExpiry = Date.now() + 10 * 60 * 1000;
+  console.log(resetToken, resetToken);
+  return resetToken;
+};
+userSchema.methods.createPasswordVerificationToken = function (): string {
+  const verificationToken = crypto.randomBytes(32).toString('hex');
+  this.verificationToken = crypto
+    .createHash('sha256')
+    .update(verificationToken)
+    .digest('hex');
+  this.verificationTokenExpiry = Date.now() + 10 * 60 * 1000;
+  console.log(verificationToken);
+  return verificationToken;
 };
 
 const User: Model<IUser> = model<IUser>('User', userSchema);

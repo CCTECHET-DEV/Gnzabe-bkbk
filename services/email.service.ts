@@ -64,13 +64,17 @@ export class EmailSender {
 export const sendVerificationEmail = async (
   req: Request,
   email: string,
-  userId: string,
-  verificationUrl: string,
+  id: string,
+  token: string,
   name?: string,
 ): Promise<void> => {
-  console.log(removeLastPathSegment(req.originalUrl), 'req.originalUrl');
-  const baseUrl = `${removeLastPathSegment(req.originalUrl)}`;
-  const token = encodeURIComponent(userId);
+  const protocol = req.protocol; // 'http' or 'https'
+  const host = req.get('host'); // 'localhost:3000' or 'yourdomain.com'
+  const baseUrl = `${protocol}://${host}${removeLastPathSegment(req.originalUrl)}`;
+  const verificationUrl = `${baseUrl}/verify?token=${token}&id=${id}`;
+
+  console.log(verificationUrl, 'verificationUrl');
+  // const token = encodeURIComponent(userId);
   const mailer = new EmailSender({
     subject: verifySubject,
     sender: verifySender,

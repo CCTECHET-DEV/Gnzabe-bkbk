@@ -59,4 +59,7 @@ export interface IUser extends IAuthDocument {
     userPassword: string,
   ): Promise<boolean>;
   passwordChangedAfter(JWTTimeStamp: number): boolean;
+
+  createPasswordResetToken(): string;
+  createVerificationToken(): string;
 }

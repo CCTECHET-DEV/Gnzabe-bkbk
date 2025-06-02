@@ -1,9 +1,11 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import Jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { AppError } from '../utilities/appError';
 import { catchAsync } from '../utilities/catchAsync';
-import { Document, Model } from 'mongoose';
+import { Model } from 'mongoose';
 import { IAuthDocument } from '../interfaces/authInterface';
+import { sendVerificationEmail } from '../services/email.service';
 
 interface SignupControllerOptions {
   allowedFields?: string[];
@@ -12,8 +14,8 @@ interface SignupControllerOptions {
   sendVerificationEmail?: (
     req: Request,
     email: string,
-    userId: string,
-    verificationUrl: string,
+    id: string,
+    token: string,
     name?: string,
   ) => Promise<void>;
 }
@@ -46,7 +48,7 @@ interface SignupControllerOptions {
 //     });
 //   });
 
-const createSignupController = <T extends Document>(
+const createSignupController = <T extends IAuthDocument>(
   Model: Model<T>,
   options: SignupControllerOptions,
 ): RequestHandler =>
@@ -63,7 +65,8 @@ const createSignupController = <T extends Document>(
 
     const document = await Model.create(filteredBody);
     const token = signToken((document._id as string).toString());
-    const verifcationUrl = `${req.protocol}`;
+    const verificationToken = document.createVerificationToken();
+    document.save({ validateBeforeSave: false });
 
     // Send verification email if provided
     if (options.sendVerificationEmail) {
@@ -76,7 +79,7 @@ const createSignupController = <T extends Document>(
         req,
         email,
         (document._id as string).toString(),
-        verifcationUrl,
+        verificationToken,
         name,
       );
     }
@@ -88,6 +91,52 @@ const createSignupController = <T extends Document>(
       data: {
         document,
       },
+    });
+  });
+
+const createVerificationController = <T extends IAuthDocument>(
+  Model: Model<T>,
+): RequestHandler =>
+  catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const { token, id } = req.query;
+    console.log(token, id, 'token and id');
+    if (!token || !id || typeof token !== 'string' || typeof id !== 'string') {
+      return next(new AppError('Token and ID are required', 400));
+    }
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+    const document = await Model.findOne({
+      _id: id,
+      verificationToken: hashedToken,
+    });
+    if (!document) {
+      return next(
+        new AppError('Invalid Id or expired verification token', 400),
+      );
+    }
+    if (document.verificationTokenExpiry!.getTime() < Date.now()) {
+      const newToken = document.createVerificationToken();
+      await document.save({ validateBeforeSave: false });
+      sendVerificationEmail(
+        req,
+        document.email || document.primaryEmail,
+        id,
+        newToken,
+        document.fullName || document.name,
+      );
+      return next(
+        new AppError(
+          'Verification token has expired! We have sent you new email please verify again!',
+          400,
+        ),
+      );
+    }
+    document.isVerified = true;
+    document.verificationToken = undefined;
+    document.verificationTokenExpiry = undefined;
+    document.save({ validateBeforeSave: false });
+    res.status(200).json({
+      status: 'success',
+      message: 'Email verified successfully',
     });
   });
 
@@ -175,6 +224,7 @@ function signToken(id: string): string {
 const factory = {
   createSignupController,
   createLoginController,
+  createVerificationController,
   createLogoutController,
 };
 export default factory;

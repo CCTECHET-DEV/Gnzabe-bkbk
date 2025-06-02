@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { ICompany } from '../interfaces/companyInterface';
 
 const companySchema = new Schema<ICompany>(
@@ -24,6 +25,12 @@ const companySchema = new Schema<ICompany>(
       sparse: true,
       lowercase: true,
       match: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
+      validate: {
+        validator: function (this: ICompany, value: string) {
+          return value !== this.primaryEmail;
+        },
+        message: 'Secondary email must be different from primary email',
+      },
     },
 
     phoneNumber: {
@@ -41,6 +48,15 @@ const companySchema = new Schema<ICompany>(
       required: true,
       minlength: 8,
       select: false, // Exclude password from queries by default
+      validate: {
+        validator: function (value: string) {
+          return /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]).{8,}$/.test(
+            value,
+          );
+        },
+        message:
+          'Password must be at least 8 characters long and include at least one letter, one number, and one special character (e.g., !@#$%)',
+      },
     },
     passwordConfirm: {
       type: String,
@@ -152,6 +168,27 @@ companySchema.methods.passwordChangedAfter = function (
   if (!this.passwordChangedAt) return false;
   const passwordChangedAtStamp = this.passwordChangedAt.getTime() / 1000;
   return passwordChangedAtStamp > JWTTimeStamp;
+};
+
+companySchema.methods.createPasswordRestToken = function (): string {
+  const resetToken = crypto.randomBytes(32).toString('hex');
+  this.resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+  this.resetPasswordTokenExpiry = Date.now() + 10 * 60 * 1000;
+  console.log(resetToken, resetToken);
+  return resetToken;
+};
+companySchema.methods.createVerificationToken = function (): string {
+  const verificationToken = crypto.randomBytes(32).toString('hex');
+  this.verificationToken = crypto
+    .createHash('sha256')
+    .update(verificationToken)
+    .digest('hex');
+  this.verificationTokenExpiry = Date.now() + 24 * 60 * 60 * 1000;
+  console.log(verificationToken);
+  return verificationToken;
 };
 
 export const Company = model<ICompany>('Company', companySchema);

@@ -34,5 +34,5 @@ export const loginCompany = authFactory.createLoginController<ICompany>(
   ['primaryEmail', 'password'],
   ['primaryEmail'],
 );
-
+export const verifyCompany = authFactory.createVerificationController(Company);
 export const logoutCompany = authFactory.createLogoutController();

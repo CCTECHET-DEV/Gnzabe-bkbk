@@ -10,7 +10,7 @@ export const sanitizeInputs = (
     if (!obj || typeof obj !== 'object') return;
 
     for (const key in obj) {
-      if (!obj.hasOwnProperty(key)) continue;
+      if (!Object.prototype.hasOwnProperty.call(obj, key)) continue;
 
       const value = obj[key];
 
