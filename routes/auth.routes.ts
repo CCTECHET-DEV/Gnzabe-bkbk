@@ -3,6 +3,7 @@ import {
   loginUser,
   logoutUser,
   signupUser,
+  // userRefreshToken,
   verifyUser,
 } from '../controllers/auth.user.controller';
 import { verifyEmails } from '../middlewares/verifyEmail.middleware';
@@ -29,6 +30,8 @@ router
 router.route('/user/verify').get(verifyUser);
 
 router.route('/user/logout').post(logoutUser);
+
+// router.route('/user/refresh-token').get(userRefreshToken);
 
 // NOTE compay authentication routes
 router.route('/company/signup').post(

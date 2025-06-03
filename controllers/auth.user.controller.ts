@@ -27,3 +27,5 @@ export const loginUser = authFactory.createLoginController<IUser>(
 );
 
 export const logoutUser = authFactory.createLogoutController();
+
+// export const userRefreshToken = authFactory.createRefreshTokenController(User);

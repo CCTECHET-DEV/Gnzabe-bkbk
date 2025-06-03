@@ -1,7 +1,7 @@
-import { Schema } from 'mongoose';
+import { model, Schema } from 'mongoose';
 import { ISession } from '../interfaces/sessonInterface';
 
-const sessionSchem = new Schema<ISession>({
+const sessionSchema = new Schema<ISession>({
   userId: {
     type: Schema.Types.ObjectId,
     ref: 'User',
@@ -12,3 +12,5 @@ const sessionSchem = new Schema<ISession>({
     default: Date.now,
   },
 });
+
+export const Session = model<ISession>('Session', sessionSchema);

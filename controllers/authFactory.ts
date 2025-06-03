@@ -1,11 +1,13 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import Jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+const { promisify } = require('util');
 import { AppError } from '../utilities/appError';
 import { catchAsync } from '../utilities/catchAsync';
 import { Model } from 'mongoose';
 import { IAuthDocument } from '../interfaces/authInterface';
 import { sendVerificationEmail } from '../services/email.service';
+import { Session } from '../model/sessionModel';
 
 interface SignupControllerOptions {
   allowedFields?: string[];
@@ -64,9 +66,15 @@ const createSignupController = <T extends IAuthDocument>(
     }
 
     const document = await Model.create(filteredBody);
-    const token = signToken((document._id as string).toString());
     const verificationToken = document.createVerificationToken();
     document.save({ validateBeforeSave: false });
+
+    // ✅ Create session
+    await Session.findOneAndUpdate(
+      { userId: document._id },
+      { lastActivityTimestamp: new Date() },
+      { upsert: true, new: true },
+    );
 
     // Send verification email if provided
     if (options.sendVerificationEmail) {
@@ -84,10 +92,15 @@ const createSignupController = <T extends IAuthDocument>(
       );
     }
 
-    res.cookie('jwt', token, cookieOptions(req));
+    const userId = (document._id as string).toString();
+    const accessToken = signToken(userId, process.env.JWT_EXPIRES_IN_HOUR);
+    // const refreshToken = signToken(userId);
+    res.cookie('jwt', accessToken, cookieOptions(req));
+    // res.cookie('refreshToken', refreshToken, cookieOptions(req));
+
     res.status(201).json({
       status: 'success',
-      token,
+      accessToken,
       data: {
         document,
       },
@@ -205,16 +218,31 @@ const createLoginController = <T extends IAuthDocument>(
     // 4. Generate token
     document.resetFailedLoginAttemptsMade();
     await document.save({ validateBeforeSave: false });
-    const token = signToken((document._id as string).toString());
+
+    // 🔄 Session update
+    await Session.findOneAndUpdate(
+      { userId: document._id },
+      { lastActivityTimestamp: new Date() },
+      { upsert: true, new: true },
+    );
+
+    // const token = signToken((document._id as string).toString());
+    // 🔐 Token creation
+    const userId = (document._id as string).toString();
+    const accessToken = signToken(userId, process.env.JWT_EXPIRES_IN_HOUR);
+    // const refreshToken = signToken(userId);
+    res.cookie('jwt', accessToken, cookieOptions(req));
+    // res.cookie('refreshToken', refreshToken, cookieOptions(req));
+
     res
       .status(200)
-      .cookie('jwt', token, cookieOptions(req))
-      .json({ status: 'success', token, data: { document } });
+      .json({ status: 'success', accessToken, data: { document } });
   });
 
 const createLogoutController = (): RequestHandler => {
   return (req: Request, res: Response, next: NextFunction) => {
     res.cookie('jwt', 'loggedout', cookieOptions(req));
+    // res.cookie('refreshToken', 'loggedout', cookieOptions(req));
 
     res.status(200).json({
       status: 'success',
@@ -222,7 +250,38 @@ const createLogoutController = (): RequestHandler => {
     });
   };
 };
-function cookieOptions(req: Request) {
+
+// export const createRefreshTokenController = <T extends IAuthDocument>(
+//   Model: Model<T>,
+// ) =>
+//   catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+//     console.log(req.cookies, 'cookies in refresh token controller');
+//     const refreshToken = req.cookies.refreshToken;
+
+//     if (!refreshToken) {
+//       return next(new AppError('Refresh token missing', 401));
+//     }
+
+//     const decoded = await promisify(Jwt.verify)(
+//       refreshToken,
+//       process.env.JWT_SECRET,
+//     );
+
+//     const document = await Model.findById(decoded.id);
+//     if (!document) {
+//       return next(new AppError('Account no longer exists', 401));
+//     }
+
+//     const newAccessToken = signToken(document._id as string);
+
+//     res.cookie('jwt', newAccessToken, cookieOptions(req));
+//     res.status(200).json({
+//       status: 'success',
+//       accessToken: newAccessToken,
+//     });
+//   });
+
+export function cookieOptions(req: Request) {
   return {
     expires: new Date(
       Date.now() +
@@ -235,9 +294,13 @@ function cookieOptions(req: Request) {
   };
 }
 
-function signToken(id: string): string {
+export function signToken(
+  id: string,
+  expiresIn = process.env.JWT_EXPIRES_IN,
+): string {
+  console.log(expiresIn, 'expiresIn');
   return Jwt.sign({ id }, process.env.JWT_SECRET!, {
-    expiresIn: parseInt(process.env.JWT_EXPIRES_IN!, 10),
+    expiresIn: parseInt(expiresIn!, 10),
   });
 }
 const factory = {
@@ -245,5 +308,6 @@ const factory = {
   createLoginController,
   createVerificationController,
   createLogoutController,
+  // createRefreshTokenController,
 };
 export default factory;
