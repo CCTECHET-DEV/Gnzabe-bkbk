@@ -1,9 +1,8 @@
-import { Request, Response, NextFunction } from 'express';
-import { Error as MongooseError } from 'mongoose';
-import { MongoServerError } from 'mongodb';
+import { NextFunction, Request, Response } from 'express';
 import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken';
+import { MongoServerError } from 'mongodb';
+import { Error as MongooseError } from 'mongoose';
 import { AppError } from '../utilities/appError';
-import { send } from 'process';
 
 const handleCastErrorDB = (error: MongooseError.CastError) => {
   const message = `Invalid ${error.path}: ${error.value}`;

@@ -1,23 +1,24 @@
-import { NextFunction, Request, Response } from 'express';
-import express from 'express';
-import morogan from 'morgan';
+import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import compression from 'compression';
-import path from 'path';
+import express, { NextFunction, Request, Response } from 'express';
+import mongoSanitize from 'express-mongo-sanitize';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
-import mongoSanitize from 'express-mongo-sanitize';
-import userRouter from './routes/user.routes';
-import companyRouter from './routes/company.routes';
+import morogan from 'morgan';
+import path from 'path';
+import globalErrorHandler from './controllers/error.controller';
+import { sanitizeInputs } from './middlewares/middlewares';
+import { requestLogger } from './middlewares/requestLogger.middleware';
+import { validationErrorLogger } from './middlewares/validationErrorLogger.middleware';
 import authRouter from './routes/auth.routes';
+import companyRouter from './routes/company.routes';
+import userRouter from './routes/user.routes';
 
 // import companyRouter from './routes/companyRoutes';
 // import courseRouter from './routes/courseRoutes';
 // import TutorialRouter from './routes/tutorialRoutes';
 // import QuizRouter from './routes/quizRoutes';
-import globalErrorHandler from './controllers/error.controller';
-import { sanitizeInputs } from './middlewares/middlewares';
 
 const allowedOrigins = [
   'http://localhost:5173',
@@ -33,6 +34,9 @@ const allowedOrigins = [
 ];
 
 const app = express();
+
+// Add request logging middleware
+app.use(requestLogger);
 
 app.use(morogan('dev'));
 // app.use(express.static(path.join(__dirname, 'public')));
@@ -97,6 +101,8 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   });
 });
 
+// Add validation error logging before global error handler
+app.use(validationErrorLogger);
 app.use(globalErrorHandler);
 
 export default app;

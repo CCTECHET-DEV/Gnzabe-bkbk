@@ -1,27 +1,27 @@
 import express from 'express';
 import {
-  loginUser,
-  logoutUser,
-  signupUser,
-} from '../controllers/auth.user.controller';
-import { verifyEmails } from '../middlewares/verifyEmail.middleware';
-import { requireBodyFields } from '../middlewares/validateFields.middleware';
-import {
   loginCompany,
   logoutCompany,
   signupCompany,
 } from '../controllers/auth.company.controller';
+import {
+  loginUser,
+  logoutUser,
+  signupUser,
+} from '../controllers/auth.user.controller';
+import { requireBodyFields } from '../middlewares/validateFields.middleware';
+import { validateLogin } from '../middlewares/validateLogin.middleware';
+import { validateSignup } from '../middlewares/validateSignup.middleware';
 
 const router = express.Router();
 
 // NOTE user authentication routes
 router.route('/user/signup').post(
+  validateSignup,
   // verifyEmails(['email']),
   signupUser,
 );
-router
-  .route('/user/login')
-  .post(requireBodyFields(['email', 'password']), loginUser);
+router.route('/user/login').post(validateLogin, loginUser);
 
 router.route('/user/logout').post(logoutUser);
 
