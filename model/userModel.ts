@@ -221,7 +221,7 @@ userSchema.methods.incrementFailedLoginAttemptsMade = async function () {
   if (this.failedLoginAttemptsMade < 3) {
     this.failedLoginAttemptsMade += 1;
   } else {
-    this.accountLockedUntil = new Date(Date.now() + 1 * 60 * 1000);
+    this.accountLockedUntil = new Date(Date.now() + 30 * 60 * 1000);
   }
 };
 
