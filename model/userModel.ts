@@ -83,10 +83,10 @@ const userSchema = new Schema<IUser>(
     verificationTokenExpiry: {
       type: Date,
     },
-    failedLoginAttempts: {
+    failedLoginAttemptsMade: {
       type: Number,
       default: 0,
-      max: 5,
+      max: 3,
       min: 0,
     },
     isActive: {
@@ -165,12 +165,22 @@ const userSchema = new Schema<IUser>(
       type: Date,
       default: Date.now,
     },
+    accountLockedUntil: {
+      type: Date,
+      default: null,
+    },
   },
   {
     toObject: { virtuals: true },
     toJSON: { virtuals: true },
   },
 );
+
+userSchema.virtual('isLocked').get(function () {
+  return (
+    this.accountLockedUntil && this.accountLockedUntil.getTime() > Date.now()
+  );
+});
 
 userSchema.pre('save', async function (this: IUser, next) {
   if (!this.isModified('password')) return next();
@@ -200,6 +210,19 @@ userSchema.methods.passwordChangedAfter = function (
   if (!this.passwordChangedAt) return false;
   const passwordChangedAtStamp = this.passwordChangedAt.getTime() / 1000;
   return passwordChangedAtStamp > JWTTimeStamp;
+};
+
+userSchema.methods.resetFailedLoginAttemptsMade = async function () {
+  this.failedLoginAttemptsMade = 0;
+};
+
+// Decrement failedLoginAttempts by 1, down to the min (0)
+userSchema.methods.incrementFailedLoginAttemptsMade = async function () {
+  if (this.failedLoginAttemptsMade < 3) {
+    this.failedLoginAttemptsMade += 1;
+  } else {
+    this.accountLockedUntil = new Date(Date.now() + 1 * 60 * 1000);
+  }
 };
 
 userSchema.methods.isPasswordCorrect = async function (

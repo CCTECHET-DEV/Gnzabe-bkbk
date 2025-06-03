@@ -17,7 +17,7 @@ export interface IUser extends IAuthDocument {
   isVerified: boolean;
   verificationToken?: string;
   verificationTokenExpiry?: Date;
-  failedLoginAttempts: number;
+  failedLoginAttemptsMade: number;
   isActive: boolean;
   resetPasswordToken?: string;
   resetPasswordTokenExpiry?: Date;
@@ -53,6 +53,7 @@ export interface IUser extends IAuthDocument {
 
   createdAt: Date;
   updatedAt: Date;
+  accountLockedUntil?: Date;
 
   isPasswordCorrect(
     candidatePassword: string,

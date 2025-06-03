@@ -9,10 +9,13 @@ export interface IAuthDocument extends Document {
   verificationToken?: string;
   verificationTokenExpiry?: Date;
   password: string;
+  isLocked: boolean;
   isPasswordCorrect(
     candidatePassword: string,
     userPassword: string,
   ): Promise<boolean>;
   createPasswordResetToken(): string;
   createVerificationToken(): string;
+  resetFailedLoginAttemptsMade(): Promise<void>;
+  incrementFailedLoginAttemptsMade(): Promise<void>;
 }

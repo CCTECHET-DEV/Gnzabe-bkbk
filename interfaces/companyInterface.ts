@@ -15,7 +15,7 @@ export interface ICompany extends IAuthDocument {
   verificationToken?: string;
   verificationTokenExpiry?: Date;
 
-  failedLoginAttempts: number;
+  failedLoginAttemptsMade: number;
   isActive: boolean;
 
   resetPasswordToken?: string;

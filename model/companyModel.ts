@@ -82,10 +82,10 @@ const companySchema = new Schema<ICompany>(
       type: Date,
     },
 
-    failedLoginAttempts: {
+    failedLoginAttemptsMade: {
       type: Number,
       default: 0,
-      max: 5,
+      max: 3,
       min: 0,
     },
     isActive: {

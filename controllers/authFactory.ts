@@ -176,16 +176,35 @@ const createLoginController = <T extends IAuthDocument>(
 
     // 3. Fetch document by filter
     const document = await Model.findOne(filter).select('+password');
-    const password = req.body.password;
 
+    const password = req.body.password;
+    if (document?.isLocked) {
+      return next(
+        new AppError(
+          'Account is locked due to too many failed login attempts. Please try again later.',
+          403,
+        ),
+      );
+    }
+    if (!document?.isVerified) {
+      return next(
+        new AppError('Please verify your email before logging in', 403),
+      );
+    }
     if (
       !document ||
       !(await document.isPasswordCorrect(password, document.password))
     ) {
+      if (document) {
+        document.incrementFailedLoginAttemptsMade();
+        await document.save({ validateBeforeSave: false });
+      }
       return next(new AppError('Incorrect credentials', 401));
     }
 
     // 4. Generate token
+    document.resetFailedLoginAttemptsMade();
+    await document.save({ validateBeforeSave: false });
     const token = signToken((document._id as string).toString());
     res
       .status(200)
