@@ -49,6 +49,10 @@ export const protectUser = catchAsync(
       return next(
         new AppError('Password has been changed. Please login again!', 401),
       );
+
+    const newToken = signToken(decoded.id, process.env.JWT_EXPIRES_IN_HOUR);
+    res.cookie('jwt', newToken, cookieOptions(req));
+
     req.user = user;
     next();
   },
