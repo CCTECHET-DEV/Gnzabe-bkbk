@@ -13,7 +13,7 @@
   "dependencies": {
     "@getbrevo/brevo": "^2.2.0",
     "@zerobounce/zero-bounce-sdk": "^1.1.2",
-    "axios": "^1.8.4",
+    "axios": "^1.9.0",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
     "compression": "^1.7.4",

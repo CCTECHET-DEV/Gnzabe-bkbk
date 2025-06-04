@@ -5,6 +5,7 @@ import {
   signupUser,
   // userRefreshToken,
   verifyUser,
+  verifyUserOtp,
 } from '../controllers/auth.user.controller';
 import { verifyEmails } from '../middlewares/verifyEmail.middleware';
 import { requireBodyFields } from '../middlewares/validateFields.middleware';
@@ -28,6 +29,7 @@ router
   .post(requireBodyFields(['email', 'password']), loginUser);
 
 router.route('/user/verify').get(verifyUser);
+router.route('/user/verify-otp').post(verifyUserOtp);
 
 router.route('/user/logout').post(logoutUser);
 

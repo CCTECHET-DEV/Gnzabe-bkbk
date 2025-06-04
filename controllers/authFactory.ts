@@ -9,6 +9,7 @@ import { IAuthDocument } from '../interfaces/authInterface';
 import { sendOtpEmail, sendVerificationEmail } from '../services/email.service';
 import { Session } from '../model/sessionModel';
 import { generateOtp } from '../utilities/helper';
+import axios from 'axios';
 
 interface SignupControllerOptions {
   allowedFields?: string[];
@@ -158,7 +159,7 @@ const createOtpVerificationController = <T extends IAuthDocument>(
 
     res.status(200).json({
       status: 'success',
-      message: 'Email verified successfully',
+      message: 'OTP verified successfully',
       data: {
         document,
       },
@@ -237,15 +238,31 @@ const createLoginController = <T extends IAuthDocument>(
 
     // creating otp
     if (document.mfaEnabled) {
-      const otp = generateOtp();
-      document.otp = otp;
-      document.otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
       if (document.mfaBy === 'email') {
+        const otp = generateOtp();
+        document.otp = otp;
+        document.otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
         await sendOtpEmail(
           document.email || document.primaryEmail,
           otp,
           document.fullName || document.name,
         );
+      }
+
+      if (document.mfaBy === 'sms') {
+        console.log(`${process.env.GEEZ_URL}phone=${document.phoneNumber}`);
+        const response = await axios({
+          url: `${process.env.GEEZ_URL}phone=${document.phoneNumber}`,
+          method: 'POST',
+        });
+        console.log(response, 'response from geeZ');
+
+        if (response.data.error) {
+          return next(new AppError('Failed to send OTP via SMS', 500));
+        }
+        const otp = response.data.code;
+        document.otp = otp;
+        document.otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
       }
       await document.save({ validateBeforeSave: false });
       return res.status(200).json({

@@ -8,6 +8,7 @@ export interface IAuthDocument extends Document {
   isVerified: boolean;
   verificationToken?: string;
   verificationTokenExpiry?: Date;
+  phoneNumber: string;
 
   otp?: string;
   otpExpiry?: Date;
