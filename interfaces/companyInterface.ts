@@ -11,6 +11,9 @@ export interface ICompany extends IAuthDocument {
   passwordChangedAt?: Date;
   logo?: string;
 
+  otp?: string;
+  mfaEnabled: boolean;
+
   isVerified: boolean;
   verificationToken?: string;
   verificationTokenExpiry?: Date;

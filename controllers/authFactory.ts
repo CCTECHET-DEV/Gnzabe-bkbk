@@ -22,34 +22,6 @@ interface SignupControllerOptions {
   ) => Promise<void>;
 }
 
-// const createSignupController = <T extends Document>(
-//   Model: Model<T>,
-//   allowedFields?: string[],
-// ): RequestHandler =>
-//   catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-//     let filteredBody = req.body;
-
-//     if (allowedFields?.length) {
-//       filteredBody = Object.fromEntries(
-//         allowedFields
-//           .filter((key) => key in req.body)
-//           .map((key) => [key, req.body[key]]),
-//       );
-//     }
-
-//     const document = await Model.create(filteredBody);
-//     const token = signToken((document._id as string).toString());
-
-//     res.cookie('jwt', token, cookieOptions(req));
-//     res.status(201).json({
-//       status: 'success',
-//       token,
-//       data: {
-//         document,
-//       },
-//     });
-//   });
-
 const createSignupController = <T extends IAuthDocument>(
   Model: Model<T>,
   options: SignupControllerOptions,
@@ -69,12 +41,12 @@ const createSignupController = <T extends IAuthDocument>(
     const verificationToken = document.createVerificationToken();
     document.save({ validateBeforeSave: false });
 
-    // ✅ Create session
-    await Session.findOneAndUpdate(
-      { userId: document._id },
-      { lastActivityTimestamp: new Date() },
-      { upsert: true, new: true },
-    );
+    // // ✅ Create session
+    // await Session.findOneAndUpdate(
+    //   { userId: document._id },
+    //   { lastActivityTimestamp: new Date() },
+    //   { upsert: true, new: true },
+    // );
 
     // Send verification email if provided
     if (options.sendVerificationEmail) {
@@ -219,12 +191,12 @@ const createLoginController = <T extends IAuthDocument>(
     document.resetFailedLoginAttemptsMade();
     await document.save({ validateBeforeSave: false });
 
-    // 🔄 Session update
-    await Session.findOneAndUpdate(
-      { userId: document._id },
-      { lastActivityTimestamp: new Date() },
-      { upsert: true, new: true },
-    );
+    // // 🔄 Session update
+    // await Session.findOneAndUpdate(
+    //   { userId: document._id },
+    //   { lastActivityTimestamp: new Date() },
+    //   { upsert: true, new: true },
+    // );
 
     // const token = signToken((document._id as string).toString());
     // 🔐 Token creation

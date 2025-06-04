@@ -8,6 +8,10 @@ export interface IAuthDocument extends Document {
   isVerified: boolean;
   verificationToken?: string;
   verificationTokenExpiry?: Date;
+
+  otp?: string;
+  mfaEnabled: boolean;
+
   password: string;
   isLocked: boolean;
   isPasswordCorrect(
