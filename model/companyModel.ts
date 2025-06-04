@@ -155,6 +155,17 @@ companySchema.pre(
   },
 );
 
+companySchema.methods.resetFailedLoginAttemptsMade = async function () {
+  this.failedLoginAttemptsMade = 0;
+};
+
+companySchema.methods.incrementFailedLoginAttemptsMade = async function () {
+  if (this.failedLoginAttemptsMade < 3) {
+    this.failedLoginAttemptsMade += 1;
+  } else {
+    this.accountLockedUntil = new Date(Date.now() + 30 * 60 * 1000);
+  }
+};
 companySchema.methods.isPasswordCorrect = async function (
   candidatePassword: string,
   userPassword: string,

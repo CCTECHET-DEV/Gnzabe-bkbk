@@ -5,6 +5,7 @@ import { ICompany } from '../interfaces/companyInterface';
 import { catchAsync } from '../utilities/catchAsync';
 import { AppError } from '../utilities/appError';
 import { Company } from '../model/companyModel';
+import { cookieOptions, signToken } from '../controllers/authFactory';
 
 declare global {
   namespace Express {
@@ -44,6 +45,10 @@ export const protectCompany = catchAsync(
       return next(
         new AppError('Password has been changed. Please login again!', 401),
       );
+
+    const newToken = signToken(decoded.id, process.env.JWT_EXPIRES_IN_HOUR);
+    res.cookie('jwt', newToken, cookieOptions(req));
+
     req.company = company;
     next();
   },
