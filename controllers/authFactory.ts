@@ -6,8 +6,9 @@ import { AppError } from '../utilities/appError';
 import { catchAsync } from '../utilities/catchAsync';
 import { Model } from 'mongoose';
 import { IAuthDocument } from '../interfaces/authInterface';
-import { sendVerificationEmail } from '../services/email.service';
+import { sendOtpEmail, sendVerificationEmail } from '../services/email.service';
 import { Session } from '../model/sessionModel';
+import { generateOtp } from '../utilities/helper';
 
 interface SignupControllerOptions {
   allowedFields?: string[];
@@ -20,6 +21,7 @@ interface SignupControllerOptions {
     token: string,
     name?: string,
   ) => Promise<void>;
+  sendOtp?: (email: string, otp: string, name?: string) => Promise<void>;
 }
 
 const createSignupController = <T extends IAuthDocument>(
@@ -125,6 +127,44 @@ const createVerificationController = <T extends IAuthDocument>(
     });
   });
 
+const createOtpVerificationController = <T extends IAuthDocument>(
+  Model: Model<T>,
+): RequestHandler =>
+  catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const { id, otp } = req.query;
+    if (!id || !otp || typeof id !== 'string' || typeof otp !== 'string') {
+      return next(new AppError('Id and OTP are required', 400));
+    }
+
+    const document = await Model.findOne({
+      _id: id,
+      otp: otp,
+      otpExpiry: { $gt: new Date() },
+    });
+
+    if (!document) {
+      return next(new AppError('Invalid Id or expired OTP', 400));
+    }
+
+    document.otp = undefined;
+    document.otpExpiry = undefined;
+    document.save({ validateBeforeSave: false });
+
+    const accessToken = signToken(
+      (document._id as string).toString(),
+      process.env.JWT_EXPIRES_IN_HOUR,
+    );
+    res.cookie('jwt', accessToken, cookieOptions(req));
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Email verified successfully',
+      data: {
+        document,
+      },
+    });
+  });
+
 const createLoginController = <T extends IAuthDocument>(
   Model: Model<T>,
   requiredFields: string[],
@@ -191,17 +231,33 @@ const createLoginController = <T extends IAuthDocument>(
     document.resetFailedLoginAttemptsMade();
     await document.save({ validateBeforeSave: false });
 
-    // // 🔄 Session update
-    // await Session.findOneAndUpdate(
-    //   { userId: document._id },
-    //   { lastActivityTimestamp: new Date() },
-    //   { upsert: true, new: true },
-    // );
-
-    // const token = signToken((document._id as string).toString());
     // 🔐 Token creation
     const userId = (document._id as string).toString();
     const accessToken = signToken(userId, process.env.JWT_EXPIRES_IN_HOUR);
+
+    // creating otp
+    if (document.mfaEnabled) {
+      const otp = generateOtp();
+      document.otp = otp;
+      document.otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
+      if (document.mfaBy === 'email') {
+        await sendOtpEmail(
+          document.email || document.primaryEmail,
+          otp,
+          document.fullName || document.name,
+        );
+      }
+      await document.save({ validateBeforeSave: false });
+      return res.status(200).json({
+        status: 'success',
+        message: `OTP sent to your ${document.mfaBy} successfully`,
+        data: {
+          id: document._id,
+          otpRequired: true,
+        },
+      });
+    }
+
     // const refreshToken = signToken(userId);
     res.cookie('jwt', accessToken, cookieOptions(req));
     // res.cookie('refreshToken', refreshToken, cookieOptions(req));
@@ -280,6 +336,7 @@ const factory = {
   createLoginController,
   createVerificationController,
   createLogoutController,
+  createOtpVerificationController,
   // createRefreshTokenController,
 };
 export default factory;

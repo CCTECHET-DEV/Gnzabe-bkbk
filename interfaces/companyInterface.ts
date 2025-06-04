@@ -12,7 +12,9 @@ export interface ICompany extends IAuthDocument {
   logo?: string;
 
   otp?: string;
+  otpExpiry?: Date;
   mfaEnabled: boolean;
+  mfaBy: 'email' | 'sms' | 'authenticator';
 
   isVerified: boolean;
   verificationToken?: string;

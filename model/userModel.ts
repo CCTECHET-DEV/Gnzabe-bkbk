@@ -57,6 +57,23 @@ const userSchema = new Schema<IUser>(
       default: 'default.jpg',
     },
 
+    otp: {
+      type: String,
+    },
+    otpExpiry: {
+      type: Date,
+      default: null,
+    },
+    mfaEnabled: {
+      type: Boolean,
+      default: true,
+    },
+    mfaBy: {
+      type: String,
+      enum: ['email', 'sms', 'authenticator'],
+      default: 'email',
+      required: true,
+    },
     role: {
       type: String,
       enum: ['employee', 'departmentAdmin'],
@@ -180,6 +197,10 @@ userSchema.virtual('isLocked').get(function () {
   return (
     this.accountLockedUntil && this.accountLockedUntil.getTime() > Date.now()
   );
+});
+
+userSchema.virtual('hasOTPExpired').get(function () {
+  return this.otpExpiry && this.otpExpiry.getTime() > Date.now();
 });
 
 userSchema.pre('save', async function (this: IUser, next) {

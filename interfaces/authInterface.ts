@@ -10,7 +10,9 @@ export interface IAuthDocument extends Document {
   verificationTokenExpiry?: Date;
 
   otp?: string;
+  otpExpiry?: Date;
   mfaEnabled: boolean;
+  mfaBy: 'email' | 'sms' | 'authenticator';
 
   password: string;
   isLocked: boolean;

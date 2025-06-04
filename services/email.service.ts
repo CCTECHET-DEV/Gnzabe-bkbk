@@ -4,8 +4,13 @@ import {
   verifySubject,
   verifyContent,
   verifySender,
-} from '../views/email/verifyComapnyEmaiil';
+} from '../views/email/verifyEmaiil';
 import { removeLastPathSegment } from '../utilities/helper';
+import {
+  verifyOtpByEmailContent,
+  verifyOtpByEmailSender,
+  verifyOtpByEmailSubject,
+} from '../views/email/sendOTPEmail';
 
 // console.log(brevo, 'brevo');
 
@@ -84,4 +89,19 @@ export const sendVerificationEmail = async (
 
   await mailer.send();
   console.log('Verification email sent to:', email);
+};
+export const sendOtpEmail = async (
+  email: string,
+  otp: string,
+  name?: string,
+): Promise<void> => {
+  const mailer = new EmailSender({
+    subject: verifyOtpByEmailSubject,
+    sender: verifyOtpByEmailSender,
+    htmlContent: verifyOtpByEmailContent(otp),
+    to: [{ email, name }],
+  });
+
+  await mailer.send();
+  console.log('OTP has been sent to email: ', email);
 };

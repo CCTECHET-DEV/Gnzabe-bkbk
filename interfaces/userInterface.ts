@@ -9,8 +9,11 @@ export interface IUser extends IAuthDocument {
   passwordConfirm?: string;
   passwordChangedAt?: Date;
   photo: string;
+
   otp?: string;
+  otpExpiry?: Date;
   mfaEnabled: boolean;
+  mfaBy: 'email' | 'sms' | 'authenticator';
 
   role: 'employee' | 'admin';
   companyId: string;
