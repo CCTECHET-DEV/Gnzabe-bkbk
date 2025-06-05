@@ -11,6 +11,11 @@ import {
   verifyOtpByEmailSender,
   verifyOtpByEmailSubject,
 } from '../views/email/sendOTPEmail';
+import {
+  resetPasswordContent,
+  resetPasswordSender,
+  resetPasswordSubject,
+} from '../views/email/passwordResetEmail';
 
 // console.log(brevo, 'brevo');
 
@@ -89,6 +94,30 @@ export const sendVerificationEmail = async (
 
   await mailer.send();
   console.log('Verification email sent to:', email);
+};
+export const sendPasswordResetEmail = async (
+  req: Request,
+  email: string,
+  id: string,
+  token: string,
+  name?: string,
+): Promise<void> => {
+  const protocol = req.protocol; // 'http' or 'https'
+  const host = req.get('host'); // 'localhost:3000' or 'yourdomain.com'
+  const baseUrl = `${protocol}://${host}${removeLastPathSegment(req.originalUrl)}`;
+  const resetUrl = `${baseUrl}/reset-password?token=${token}&id=${id}`;
+
+  console.log(resetUrl, 'resetUrl');
+  // const token = encodeURIComponent(userId);
+  const mailer = new EmailSender({
+    subject: resetPasswordSubject,
+    sender: resetPasswordSender,
+    htmlContent: resetPasswordContent(resetUrl),
+    to: [{ email, name }],
+  });
+
+  await mailer.send();
+  console.log('Password reset email sent to:', email);
 };
 export const sendOtpEmail = async (
   email: string,

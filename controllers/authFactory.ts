@@ -6,7 +6,11 @@ import { AppError } from '../utilities/appError';
 import { catchAsync } from '../utilities/catchAsync';
 import { Model } from 'mongoose';
 import { IAuthDocument } from '../interfaces/authInterface';
-import { sendOtpEmail, sendVerificationEmail } from '../services/email.service';
+import {
+  sendOtpEmail,
+  sendPasswordResetEmail,
+  sendVerificationEmail,
+} from '../services/email.service';
 import { Session } from '../model/sessionModel';
 import { generateOtp } from '../utilities/helper';
 import axios from 'axios';
@@ -160,6 +164,7 @@ const createOtpVerificationController = <T extends IAuthDocument>(
     res.status(200).json({
       status: 'success',
       message: 'OTP verified successfully',
+      token: accessToken,
       data: {
         document,
       },
@@ -267,7 +272,7 @@ const createLoginController = <T extends IAuthDocument>(
       await document.save({ validateBeforeSave: false });
       return res.status(200).json({
         status: 'success',
-        message: `OTP sent to your ${document.mfaBy} successfully`,
+        message: `OTP sent to you via ${document.mfaBy} successfully`,
         data: {
           id: document._id,
           otpRequired: true,
@@ -282,6 +287,43 @@ const createLoginController = <T extends IAuthDocument>(
     res
       .status(200)
       .json({ status: 'success', accessToken, data: { document } });
+  });
+
+export const createResetLinkController = <T extends IAuthDocument>(
+  Model: Model<T>,
+  emailField: string,
+): RequestHandler =>
+  catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const { email } = req.body;
+
+    if (!email) {
+      return next(new AppError('Please provide an email', 400));
+    }
+
+    const document = await Model.findOne({
+      [emailField]: email,
+    } as Record<string, any>);
+
+    if (!document) {
+      return res
+        .status(404)
+        .json({ status: 'fail', message: 'No account with that email.' });
+    }
+
+    const resetToken = document.createPasswordResetToken();
+    await document.save({ validateBeforeSave: false });
+
+    await sendPasswordResetEmail(
+      req,
+      document[emailField as keyof typeof document] as string,
+      (document._id as string).toString(),
+      resetToken,
+    );
+
+    return res.status(200).json({
+      status: 'success',
+      message: 'Password reset link sent to your email',
+    });
   });
 
 const createLogoutController = (): RequestHandler => {

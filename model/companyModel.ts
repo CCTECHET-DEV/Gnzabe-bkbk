@@ -188,7 +188,7 @@ companySchema.methods.createPasswordRestToken = function (): string {
     .update(resetToken)
     .digest('hex');
   this.resetPasswordTokenExpiry = Date.now() + 10 * 60 * 1000;
-  console.log(resetToken, resetToken);
+  console.log(resetToken, this.resetPasswordTokenExpiry);
   return resetToken;
 };
 companySchema.methods.createVerificationToken = function (): string {
