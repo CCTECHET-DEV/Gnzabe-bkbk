@@ -5,6 +5,12 @@ export interface IAuthDocument extends Document {
   name: string;
   email: string;
   primaryEmail: string;
+
+  password: string;
+  passwordConfirm?: string;
+  resetPasswordToken?: string;
+  resetPasswordTokenExpiry?: Date;
+
   isVerified: boolean;
   verificationToken?: string;
   verificationTokenExpiry?: Date;
@@ -15,7 +21,6 @@ export interface IAuthDocument extends Document {
   mfaEnabled: boolean;
   mfaBy: 'email' | 'sms' | 'authenticator';
 
-  password: string;
   isLocked: boolean;
   isPasswordCorrect(
     candidatePassword: string,

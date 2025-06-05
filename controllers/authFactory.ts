@@ -14,6 +14,7 @@ import {
 import { Session } from '../model/sessionModel';
 import { generateOtp } from '../utilities/helper';
 import axios from 'axios';
+import { create } from 'domain';
 
 interface SignupControllerOptions {
   allowedFields?: string[];
@@ -309,7 +310,7 @@ export const createResetLinkController = <T extends IAuthDocument>(
         .status(404)
         .json({ status: 'fail', message: 'No account with that email.' });
     }
-
+    console.log(document);
     const resetToken = document.createPasswordResetToken();
     await document.save({ validateBeforeSave: false });
 
@@ -323,6 +324,52 @@ export const createResetLinkController = <T extends IAuthDocument>(
     return res.status(200).json({
       status: 'success',
       message: 'Password reset link sent to your email',
+    });
+  });
+
+export const createResetPasswordController = <T extends IAuthDocument>(
+  Model: Model<T>,
+  emailField: string,
+): RequestHandler =>
+  catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const { email, token, password, passwordConfirm } = req.body;
+
+    // 1. Validate input
+    if (!email || !token || !password || !passwordConfirm) {
+      return next(new AppError('All fields are required', 400));
+    }
+
+    if (password !== passwordConfirm) {
+      return next(new AppError("Passwords don't match", 400));
+    }
+
+    // 2. Hash the token
+    const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+    // 3. Find document by email and token
+    const query: any = {
+      [emailField]: email,
+      resetPasswordToken: hashedToken,
+      resetPasswordTokenExpiry: { $gt: Date.now() },
+    };
+
+    const document = await Model.findOne(query);
+
+    if (!document) {
+      return next(new AppError('Token is invalid or has expired', 400));
+    }
+
+    // 4. Update password and clear reset token fields
+    document.password = password;
+    document.passwordConfirm = passwordConfirm;
+    document.resetPasswordToken = undefined;
+    document.resetPasswordTokenExpiry = undefined;
+
+    await document.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Password updated successfully',
     });
   });
 
@@ -396,6 +443,7 @@ const factory = {
   createVerificationController,
   createLogoutController,
   createOtpVerificationController,
+  createResetLinkController,
   // createRefreshTokenController,
 };
 export default factory;

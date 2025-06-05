@@ -261,7 +261,7 @@ userSchema.methods.passwordChangedAfter = function (
   return passwordChangedAtStamp > JWTTimeStamp;
 };
 
-userSchema.methods.createPasswordRestToken = function (): string {
+userSchema.methods.createPasswordResetToken = function (): string {
   const resetToken = crypto.randomBytes(32).toString('hex');
   this.resetPasswordToken = crypto
     .createHash('sha256')

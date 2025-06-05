@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+  getUserPasswordResetToken,
   loginUser,
   logoutUser,
   signupUser,
@@ -30,6 +31,7 @@ router
 
 router.route('/user/verify').get(verifyUser);
 router.route('/user/verify-otp').post(verifyUserOtp);
+router.route('/user/get-reset-link').get(getUserPasswordResetToken);
 
 router.route('/user/logout').post(logoutUser);
 
