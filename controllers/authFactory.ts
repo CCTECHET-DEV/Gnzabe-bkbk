@@ -57,6 +57,9 @@ const createSignupController = <T extends IAuthDocument>(
     // );
 
     // Send verification email if provided
+    const userId = (document._id as string).toString();
+    const accessToken = signToken(userId, process.env.JWT_EXPIRES_IN_HOUR);
+
     if (options.sendVerificationEmail) {
       const email = (document as any)[options.emailField];
       const name = options.nameField
@@ -70,17 +73,26 @@ const createSignupController = <T extends IAuthDocument>(
         verificationToken,
         name,
       );
+      document.verificationToken = undefined;
+      document.verificationTokenExpiry = undefined;
+
+      return res.status(201).json({
+        status: 'success',
+        token: accessToken,
+        message: 'Signup successful! Please verify your email.',
+        data: {
+          document,
+        },
+      });
     }
 
-    const userId = (document._id as string).toString();
-    const accessToken = signToken(userId, process.env.JWT_EXPIRES_IN_HOUR);
     // const refreshToken = signToken(userId);
     res.cookie('jwt', accessToken, cookieOptions(req));
     // res.cookie('refreshToken', refreshToken, cookieOptions(req));
 
     res.status(201).json({
       status: 'success',
-      accessToken,
+      token: accessToken,
       data: {
         document,
       },
