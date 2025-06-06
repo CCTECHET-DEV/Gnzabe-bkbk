@@ -16,6 +16,7 @@ import {
   logoutCompany,
   signupCompany,
   verifyCompany,
+  verifyCompanyOtp,
 } from '../controllers/auth.company.controller';
 
 const router = express.Router();
@@ -50,6 +51,7 @@ router
   .post(requireBodyFields(['primaryEmail', 'password']), loginCompany);
 
 router.route('/company/verify').get(verifyCompany);
+router.route('/company/verify-otp').post(verifyCompanyOtp);
 
 router.route('/company/logout').post(logoutCompany);
 export default router;
