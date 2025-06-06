@@ -70,6 +70,23 @@ const companySchema = new Schema<ICompany>(
         message: 'Password confirmation does not match password',
       },
     },
+    otp: {
+      type: String,
+    },
+    otpExpiry: {
+      type: Date,
+      default: null,
+    },
+    mfaEnabled: {
+      type: Boolean,
+      default: true,
+    },
+    mfaBy: {
+      type: String,
+      enum: ['email', 'sms', 'authenticator'],
+      default: 'email',
+      required: true,
+    },
     passwordChangedAt: Date,
     isVerified: {
       type: Boolean,
