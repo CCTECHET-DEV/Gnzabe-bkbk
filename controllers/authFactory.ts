@@ -218,11 +218,7 @@ const createLoginController = <T extends IAuthDocument>(
         ),
       );
     }
-    if (!document?.isVerified) {
-      return next(
-        new AppError('Please verify your email before logging in', 403),
-      );
-    }
+
     if (
       !document ||
       !(await document.isPasswordCorrect(password, document.password))
@@ -231,9 +227,16 @@ const createLoginController = <T extends IAuthDocument>(
         document.incrementFailedLoginAttemptsMade();
         await document.save({ validateBeforeSave: false });
       }
+      console.log(document, Model, filter);
+
       return next(new AppError('Incorrect credentials', 401));
     }
 
+    if (!document?.isVerified) {
+      return next(
+        new AppError('Please verify your email before logging in', 403),
+      );
+    }
     // 4. Generate token
     document.resetFailedLoginAttemptsMade();
     await document.save({ validateBeforeSave: false });
