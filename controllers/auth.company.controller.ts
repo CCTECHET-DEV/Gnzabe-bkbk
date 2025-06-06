@@ -39,4 +39,9 @@ export const verifyCompany = authFactory.createVerificationController(Company);
 export const verifyCompanyOtp =
   authFactory.createOtpVerificationController(Company);
 
+export const getCompanyPasswordResetToken =
+  authFactory.createResetLinkController(Company, 'primaryEmail');
+export const resetCompanyPassword =
+  authFactory.createResetPasswordController(Company);
+
 export const logoutCompany = authFactory.createLogoutController();

@@ -12,8 +12,10 @@ import {
 import { verifyEmails } from '../middlewares/verifyEmail.middleware';
 import { requireBodyFields } from '../middlewares/validateFields.middleware';
 import {
+  getCompanyPasswordResetToken,
   loginCompany,
   logoutCompany,
+  resetCompanyPassword,
   signupCompany,
   verifyCompany,
   verifyCompanyOtp,
@@ -52,6 +54,8 @@ router
 
 router.route('/company/verify').get(verifyCompany);
 router.route('/company/verify-otp').post(verifyCompanyOtp);
+router.route('/company/get-reset-link').get(getCompanyPasswordResetToken);
+router.route('/company/reset-password').post(resetCompanyPassword);
 
 router.route('/company/logout').post(logoutCompany);
 export default router;

@@ -29,7 +29,6 @@ export const loginUser = authFactory.createLoginController<IUser>(
   ['email'],
 );
 
-export const logoutUser = authFactory.createLogoutController();
 export const verifyUserOtp = authFactory.createOtpVerificationController(User);
 export const getUserPasswordResetToken = authFactory.createResetLinkController(
   User,
@@ -38,4 +37,5 @@ export const getUserPasswordResetToken = authFactory.createResetLinkController(
 export const resetUserPassword =
   authFactory.createResetPasswordController(User);
 
+export const logoutUser = authFactory.createLogoutController();
 // export const userRefreshToken = authFactory.createRefreshTokenController(User);
