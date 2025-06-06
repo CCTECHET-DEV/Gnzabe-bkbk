@@ -70,5 +70,8 @@
     "sourceType": "module"
   },
   "author": "CCTECHET",
-  "license": "ISC"
+  "license": "ISC",
+  "engines": {
+    "node": "22.15.0"
+  }
 }
