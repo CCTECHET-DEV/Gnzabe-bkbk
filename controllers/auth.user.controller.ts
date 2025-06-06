@@ -35,5 +35,7 @@ export const getUserPasswordResetToken = authFactory.createResetLinkController(
   User,
   'email',
 );
+export const resetUserPassword =
+  authFactory.createResetPasswordController(User);
 
 // export const userRefreshToken = authFactory.createRefreshTokenController(User);

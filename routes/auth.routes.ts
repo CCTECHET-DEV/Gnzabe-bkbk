@@ -3,6 +3,7 @@ import {
   getUserPasswordResetToken,
   loginUser,
   logoutUser,
+  resetUserPassword,
   signupUser,
   // userRefreshToken,
   verifyUser,
@@ -32,6 +33,7 @@ router
 router.route('/user/verify').get(verifyUser);
 router.route('/user/verify-otp').post(verifyUserOtp);
 router.route('/user/get-reset-link').get(getUserPasswordResetToken);
+router.route('/user/reset-password').post(resetUserPassword);
 
 router.route('/user/logout').post(logoutUser);
 
