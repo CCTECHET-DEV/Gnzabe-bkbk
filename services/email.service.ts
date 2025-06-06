@@ -105,14 +105,15 @@ export const sendPasswordResetEmail = async (
   const protocol = req.protocol; // 'http' or 'https'
   const host = req.get('host'); // 'localhost:3000' or 'yourdomain.com'
   const baseUrl = `${protocol}://${host}${removeLastPathSegment(req.originalUrl)}`;
-  const resetUrl = `${baseUrl}/reset-password?token=${token}&id=${id}`;
+  // const resetUrl = `${baseUrl}/reset-password?token=${token}&id=${id}`;
+  const resetFrontendUrl = `${process.env.PASSWORD_RESET_FRONTEND_URL}?token=${token}&id=${id}`;
 
-  console.log(resetUrl, 'resetUrl');
+  console.log(resetFrontendUrl, 'resetUrl');
   // const token = encodeURIComponent(userId);
   const mailer = new EmailSender({
     subject: resetPasswordSubject,
     sender: resetPasswordSender,
-    htmlContent: resetPasswordContent(resetUrl),
+    htmlContent: resetPasswordContent(resetFrontendUrl),
     to: [{ email, name }],
   });
 

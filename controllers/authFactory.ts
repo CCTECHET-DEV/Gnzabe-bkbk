@@ -442,8 +442,8 @@ export function cookieOptions(req: Request) {
     ),
     httpOnly: true,
     sameSite: 'lax' as const,
-    // secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
-    // domain: '.yourdomain.com',
+    domain: `${process.env.COOKIE_DOMAIN!}`,
+    secure: process.env.COOKIE_SECURE! === 'true',
   };
 }
 
