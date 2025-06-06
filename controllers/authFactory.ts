@@ -332,13 +332,12 @@ export const createResetLinkController = <T extends IAuthDocument>(
 
 export const createResetPasswordController = <T extends IAuthDocument>(
   Model: Model<T>,
-  emailField: string,
 ): RequestHandler =>
   catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const { email, token, password, passwordConfirm } = req.body;
+    const { id, token, password, passwordConfirm } = req.body;
 
     // 1. Validate input
-    if (!email || !token || !password || !passwordConfirm) {
+    if (!id || !token || !password || !passwordConfirm) {
       return next(new AppError('All fields are required', 400));
     }
 
@@ -350,13 +349,17 @@ export const createResetPasswordController = <T extends IAuthDocument>(
     const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
 
     // 3. Find document by email and token
-    const query: any = {
-      [emailField]: email,
+    // const query: any = {
+    //   id,
+    //   resetPasswordToken: hashedToken,
+    //   resetPasswordTokenExpiry: { $gt: Date.now() },
+    // };
+
+    const document = await Model.findOne({
+      _id: id,
       resetPasswordToken: hashedToken,
       resetPasswordTokenExpiry: { $gt: Date.now() },
-    };
-
-    const document = await Model.findOne(query);
+    });
 
     if (!document) {
       return next(new AppError('Token is invalid or has expired', 400));
@@ -368,7 +371,7 @@ export const createResetPasswordController = <T extends IAuthDocument>(
     document.resetPasswordToken = undefined;
     document.resetPasswordTokenExpiry = undefined;
 
-    await document.save({ validateBeforeSave: false });
+    await document.save({ validateBeforeSave: true });
 
     res.status(200).json({
       status: 'success',
@@ -447,6 +450,7 @@ const factory = {
   createLogoutController,
   createOtpVerificationController,
   createResetLinkController,
+  createResetPasswordController,
   // createRefreshTokenController,
 };
 export default factory;
