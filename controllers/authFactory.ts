@@ -246,6 +246,7 @@ const createLoginController = <T extends IAuthDocument>(
     const accessToken = signToken(userId, process.env.JWT_EXPIRES_IN_HOUR);
 
     // creating otp
+    console.log(document, document.mfaEnabled, 'document in login controller');
     if (document.mfaEnabled) {
       if (document.mfaBy === 'email') {
         const otp = generateOtp();
