@@ -4,7 +4,7 @@ const { promisify } = require('util');
 import { ICompany } from '../interfaces/companyInterface';
 import { catchAsync } from '../utilities/catchAsync';
 import { AppError } from '../utilities/appError';
-import { Company } from '../model/companyModel';
+import Company from '../model/companyModel';
 import { cookieOptions, signToken } from '../controllers/authFactory';
 
 declare global {

@@ -2,13 +2,7 @@ import dotenv from 'dotenv';
 dotenv.config({
   path: './config.env',
 });
-
-import app from './app';
 import connectToDatabase from './config/dbConfig';
-import setupCronJobs from './jobs';
-
-connectToDatabase();
-setupCronJobs();
 
 process.on('uncaughtException', (error: Error) => {
   console.log('UncaughtException shutting down...');
@@ -16,23 +10,41 @@ process.on('uncaughtException', (error: Error) => {
   process.exit(1);
 });
 
-const server = app.listen(process.env.PORT!, () => {
-  console.log(`server is running on port ${process.env.PORT}`);
-});
+let server: any;
+
+(async () => {
+  await connectToDatabase();
+  // setupCronJobs();
+
+  // Import app only after DB connection is established
+  const app = (await import('./app')).default;
+  const setupCronJobs = (await import('./jobs')).default;
+  setupCronJobs();
+
+  server = app.listen(process.env.PORT!, () => {
+    console.log(`server is running on port ${process.env.PORT}`);
+  });
+})();
 
 process.on('unhandledRejection', (error: unknown) => {
   if (error instanceof Error) {
     console.log('Unhandled Rejection shutting down...');
     console.log(error.name, error.message);
   } else console.log(error);
-  server.close(() => {
+  if (server) {
+    server.close(() => {
+      process.exit(1);
+    });
+  } else {
     process.exit(1);
-  });
+  }
 });
 
 process.on('SIGTERM', () => {
   console.log('💣❌SIGTERM received, shutting down...');
-  server.close(() => {
-    console.log('💣❌Process terminated!');
-  });
+  if (server) {
+    server.close(() => {
+      console.log('💣❌Process terminated!');
+    });
+  }
 });

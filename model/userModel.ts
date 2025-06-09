@@ -2,6 +2,7 @@ import { Types, Schema, model, Model } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { IUser } from '../interfaces/userInterface';
+import { localConnection } from '../config/dbConfig';
 
 const userSchema = new Schema<IUser>(
   {
@@ -282,5 +283,11 @@ userSchema.methods.createVerificationToken = function (): string {
   return verificationToken;
 };
 
-const User: Model<IUser> = model<IUser>('User', userSchema);
+// const User: Model<IUser> = localConnection.model<IUser>('User', userSchema);
+
+const User = localConnection.model<IUser>('User', userSchema);
+
+// const User: Model<IUser> = model<IUser>('User', userSchema);
 export default User;
+
+console.log('User model created successfully');

@@ -2,6 +2,7 @@ import { Schema, model } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { ICompany } from '../interfaces/companyInterface';
+import { localConnection } from '../config/dbConfig';
 
 const companySchema = new Schema<ICompany>(
   {
@@ -219,4 +220,10 @@ companySchema.methods.createVerificationToken = function (): string {
   return verificationToken;
 };
 
-export const Company = model<ICompany>('Company', companySchema);
+// const Company = model<ICompany>('Company', companySchema);
+
+const Company = localConnection.model<ICompany>('Company', companySchema);
+
+export default Company;
+
+console.log('Company model created successfully on local connection');

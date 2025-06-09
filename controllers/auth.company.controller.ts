@@ -1,5 +1,5 @@
 import { ICompany } from '../interfaces/companyInterface';
-import { Company } from '../model/companyModel';
+import Company from '../model/companyModel';
 import { sendVerificationEmail } from '../services/email.service';
 import authFactory from './authFactory';
 

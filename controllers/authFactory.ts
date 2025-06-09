@@ -173,7 +173,7 @@ const createOtpVerificationController = <T extends IAuthDocument>(
       process.env.JWT_EXPIRES_IN_HOUR,
     );
     res.cookie('jwt', accessToken, cookieOptions(req));
-
+    // console.log('cookie set');
     res.status(200).json({
       status: 'success',
       message: 'OTP verified successfully',
@@ -435,6 +435,10 @@ const createLogoutController = (): RequestHandler => {
 //   });
 
 export function cookieOptions(req: Request) {
+  const cookieDomain =
+    process.env.COOKIE_DOMAIN === 'localhost'
+      ? undefined
+      : process.env.COOKIE_DOMAIN;
   return {
     expires: new Date(
       Date.now() +
@@ -442,7 +446,7 @@ export function cookieOptions(req: Request) {
     ),
     httpOnly: true,
     sameSite: 'lax' as const,
-    domain: `${process.env.COOKIE_DOMAIN!}`,
+    ...(cookieDomain && { domain: cookieDomain }),
     secure: process.env.COOKIE_SECURE! === 'true',
   };
 }
