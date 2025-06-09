@@ -1,4 +1,4 @@
-import { Types, Schema, model, Model } from 'mongoose';
+import { Types, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { IUser } from '../interfaces/userInterface';
@@ -82,12 +82,12 @@ const userSchema = new Schema<IUser>(
       required: true,
     },
     companyId: {
-      type: String,
+      type: Schema.Types.ObjectId,
       required: true,
       ref: 'Company',
     },
     departmentId: {
-      type: String,
+      type: Schema.Types.ObjectId,
       required: true,
       ref: 'Department',
     },

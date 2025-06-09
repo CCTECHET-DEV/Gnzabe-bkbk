@@ -1,4 +1,4 @@
-import mongoose, { Schema, Model } from 'mongoose';
+import { Schema, Model } from 'mongoose';
 import { cloudConnection } from '../config/dbConfig';
 import { IDepartment } from '../interfaces/departmentInterface';
 
@@ -47,8 +47,9 @@ const DepartmentSchema = new Schema<IDepartment>({
   },
 });
 
-const Department: Model<IDepartment> = cloudConnection.model<IDepartment>(
+const Department = cloudConnection.model<IDepartment>(
   'Department',
   DepartmentSchema,
 );
+
 export default Department;

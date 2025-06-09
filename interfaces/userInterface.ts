@@ -16,8 +16,8 @@ export interface IUser extends IAuthDocument {
   mfaBy: 'email' | 'sms' | 'authenticator';
 
   role: 'employee' | 'admin';
-  companyId: string;
-  departmentId: string;
+  companyId: Types.ObjectId;
+  departmentId: Types.ObjectId;
   isApproved: boolean;
   isVerified: boolean;
   verificationToken?: string;

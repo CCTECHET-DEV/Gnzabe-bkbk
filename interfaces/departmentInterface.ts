@@ -1,6 +1,6 @@
-import { Types } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
-export interface IDepartment {
+export interface IDepartment extends Document {
   name: string;
   companyId: Types.ObjectId;
   departmentAdmin?: Types.ObjectId | null;

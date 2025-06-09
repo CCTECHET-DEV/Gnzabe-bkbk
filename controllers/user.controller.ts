@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import User from '../model/userModel';
 import dbFactory from '../dbOperations/dbFactory';
-import { catchAsync } from '../utilities/catchAsync';
 
 export const getAllUsers = dbFactory.getAll(User);
 export const getUser = dbFactory.getOne(User);
