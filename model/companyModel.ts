@@ -120,8 +120,14 @@ const companySchema = new Schema<ICompany>(
 
     departments: [
       {
-        type: Schema.Types.ObjectId,
-        ref: 'Department',
+        id: {
+          type: Schema.Types.ObjectId,
+          required: true,
+        },
+        name: {
+          type: String,
+          required: true,
+        },
       },
     ],
 

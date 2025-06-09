@@ -10,6 +10,7 @@ import helmet from 'helmet';
 import mongoSanitize from 'express-mongo-sanitize';
 import userRouter from './routes/user.routes';
 import companyRouter from './routes/company.routes';
+import departmentRouter from './routes/department.routes';
 import authRouter from './routes/auth.routes';
 
 // import companyRouter from './routes/companyRoutes';
@@ -84,6 +85,7 @@ app.use(
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/companies', companyRouter);
 app.use('/api/v1/authentication', authRouter);
+app.use('/api/v1/departments', departmentRouter);
 
 // app.use('/api/v1/courses', courseRouter);
 // app.use('/api/v1/tutorials', TutorialRouter);

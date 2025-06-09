@@ -11,13 +11,11 @@ const DepartmentSchema = new Schema<IDepartment>({
 
   companyId: {
     type: Schema.Types.ObjectId,
-    ref: 'Company', // refers to Company (Super Admin)
     required: true,
   },
 
   departmentAdmin: {
     type: Schema.Types.ObjectId,
-    ref: 'User',
     unique: true, // One admin per department
     sparse: true, // in case admin is not yet assigned
   },
@@ -25,7 +23,6 @@ const DepartmentSchema = new Schema<IDepartment>({
   employees: [
     {
       type: Schema.Types.ObjectId,
-      ref: 'User',
     },
   ],
 
@@ -47,7 +44,10 @@ const DepartmentSchema = new Schema<IDepartment>({
   },
 });
 
-const Department = cloudConnection.model<IDepartment>(
+// Ensure department name is unique within a company
+DepartmentSchema.index({ companyId: 1, name: 1 }, { unique: true });
+
+const Department: Model<IDepartment> = cloudConnection.model<IDepartment>(
   'Department',
   DepartmentSchema,
 );

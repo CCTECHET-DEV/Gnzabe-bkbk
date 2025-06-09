@@ -26,7 +26,10 @@ export interface ICompany extends IAuthDocument {
   resetPasswordToken?: string;
   resetPasswordTokenExpiry?: Date;
 
-  departments: Types.ObjectId[]; // References to Department documents
+  departments: {
+    id: Types.ObjectId;
+    name: string;
+  }[]; // References to Department documents
 
   preferences: {
     theme: 'light' | 'dark';

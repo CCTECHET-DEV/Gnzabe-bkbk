@@ -89,7 +89,6 @@ const userSchema = new Schema<IUser>(
     departmentId: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref: 'Department',
     },
     isVerified: {
       type: Boolean,
