@@ -58,11 +58,16 @@ const createSignupController = <T extends IAuthDocument>(
     const document = await Model.create(filteredBody);
     const verificationToken = document.createVerificationToken();
     document.save({ validateBeforeSave: false });
+
+    console.log('about to push');
     department?.employees.push({
       id: document.id,
       name: document.fullName,
+      email: document.email,
       role: document?.role,
     });
+    department?.save({ validateBeforeSave: false });
+    console.log('after push');
 
     // // ✅ Create session
     // await Session.findOneAndUpdate(

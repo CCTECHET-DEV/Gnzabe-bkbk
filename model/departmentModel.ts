@@ -2,6 +2,29 @@ import { Schema, Model } from 'mongoose';
 import { cloudConnection } from '../config/dbConfig';
 import { IDepartment } from '../interfaces/departmentInterface';
 
+const employeeSubSchema = new Schema(
+  {
+    id: {
+      type: Schema.Types.ObjectId,
+      required: true,
+    },
+    name: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+    },
+    role: {
+      type: String,
+      enum: ['employee', 'departmentAdmin'], // Default role for employees
+      default: 'employee',
+    }, // Default role for employees
+  },
+  { _id: false }, // 🚫 disables auto _id for each department item
+);
+
 const DepartmentSchema = new Schema<IDepartment>({
   name: {
     type: String,
@@ -20,17 +43,7 @@ const DepartmentSchema = new Schema<IDepartment>({
     sparse: true, // in case admin is not yet assigned
   },
 
-  employees: [
-    {
-      type: Schema.Types.ObjectId,
-      name: String,
-      role: {
-        type: String,
-        enum: ['employee', 'departmentAdmin'], // Default role for employees
-        default: 'employee',
-      }, // Default role for employees
-    },
-  ],
+  employees: [employeeSubSchema],
 
   coursesAssignedToDepartment: [
     {

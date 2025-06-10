@@ -4,6 +4,20 @@ import crypto from 'crypto';
 import { ICompany } from '../interfaces/companyInterface';
 import { localConnection } from '../config/dbConfig';
 
+const departmentSubSchema = new Schema(
+  {
+    id: {
+      type: Schema.Types.ObjectId,
+      required: true,
+    },
+    name: {
+      type: String,
+      required: true,
+    },
+  },
+  { _id: false }, // 🚫 disables auto _id for each department item
+);
+
 const companySchema = new Schema<ICompany>(
   {
     name: {
@@ -118,18 +132,7 @@ const companySchema = new Schema<ICompany>(
       type: Date,
     },
 
-    departments: [
-      {
-        id: {
-          type: Schema.Types.ObjectId,
-          required: true,
-        },
-        name: {
-          type: String,
-          required: true,
-        },
-      },
-    ],
+    departments: [departmentSubSchema],
 
     preferences: {
       theme: {
@@ -157,11 +160,18 @@ const companySchema = new Schema<ICompany>(
     toJSON: { virtuals: true },
   },
 );
+
 companySchema.pre('save', async function (this: ICompany, next) {
   if (!this.isModified('password')) return next();
   this.password = await bcrypt.hash(this.password, 8);
   this.passwordConfirm = undefined;
   next();
+});
+
+companySchema.virtual('employees', {
+  ref: 'User',
+  localField: '_id',
+  foreignField: 'companyId',
 });
 
 companySchema.pre(

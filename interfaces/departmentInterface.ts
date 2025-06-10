@@ -2,8 +2,9 @@ import { Document, Types } from 'mongoose';
 
 export interface IDepartmentEmployee {
   id: Types.ObjectId;
-  name?: string;
-  role?: 'employee' | 'departmentAdmin';
+  name: string;
+  email: string;
+  role: 'employee' | 'departmentAdmin';
 }
 
 export interface IDepartment extends Document {
