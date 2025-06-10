@@ -4,6 +4,7 @@
  * @returns {string} The path with the last segment removed (e.g., '/v1/authentication/user').
  */
 import otpGenerator from 'otp-generator';
+import { ICompany } from '../interfaces/companyInterface';
 
 export function removeLastPathSegment(path: string): string {
   if (!path) return path;
@@ -21,3 +22,15 @@ export const generateOtp = () =>
     lowerCaseAlphabets: false,
     specialChars: false,
   });
+
+/**
+ * Filters a company object to only include _id, name, and departments fields.
+ * @param company The company object from the database
+ */
+export function filterCompanyForRegistration(company: ICompany) {
+  return {
+    id: company._id,
+    name: company.name,
+    departments: company.departments,
+  };
+}

@@ -118,6 +118,7 @@ const userSchema = new Schema<IUser>(
     },
     isApproved: {
       type: Boolean,
+      default: false,
     },
     assignedCourses: [{ type: Types.ObjectId, ref: 'Course' }],
     progress: {
