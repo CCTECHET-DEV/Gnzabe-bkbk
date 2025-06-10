@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import { Document } from 'mongoose';
 
 export interface IAuthDocument extends Document {
@@ -20,6 +21,8 @@ export interface IAuthDocument extends Document {
   otpExpiry?: Date;
   mfaEnabled: boolean;
   mfaBy: 'email' | 'sms' | 'authenticator';
+  role: 'employee' | 'departmentAdmin';
+  // departmentId?: Types.ObjectId;
 
   isLocked: boolean;
   isPasswordCorrect(

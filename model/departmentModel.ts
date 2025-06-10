@@ -23,6 +23,12 @@ const DepartmentSchema = new Schema<IDepartment>({
   employees: [
     {
       type: Schema.Types.ObjectId,
+      name: String,
+      role: {
+        type: String,
+        enum: ['employee', 'departmentAdmin'], // Default role for employees
+        default: 'employee',
+      }, // Default role for employees
     },
   ],
 

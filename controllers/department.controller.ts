@@ -10,7 +10,6 @@ export const getDepartment = dbFactory.getOne(Department);
 
 export const createDepartment = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    console.log(req.company, 'req.company');
     const companyId = req.company?._id;
     if (!companyId) return next(new AppError('Company ID is required', 400));
     const company = await Company.findById(companyId);

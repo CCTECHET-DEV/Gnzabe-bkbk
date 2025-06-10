@@ -15,6 +15,7 @@ import { Session } from '../model/sessionModel';
 import { generateOtp } from '../utilities/helper';
 import axios from 'axios';
 import { create } from 'domain';
+import Department from '../model/departmentModel';
 
 interface SignupControllerOptions {
   allowedFields?: string[];
@@ -45,9 +46,23 @@ const createSignupController = <T extends IAuthDocument>(
       );
     }
 
+    // employee specific code
+    let department;
+    if (filteredBody.departmentId) {
+      department = await Department.findById(filteredBody.departmentId);
+      if (!department) {
+        return next(new AppError('Invalid department ID', 400));
+      }
+    }
+
     const document = await Model.create(filteredBody);
     const verificationToken = document.createVerificationToken();
     document.save({ validateBeforeSave: false });
+    department?.employees.push({
+      id: document.id,
+      name: document.fullName,
+      role: document?.role,
+    });
 
     // // ✅ Create session
     // await Session.findOneAndUpdate(
