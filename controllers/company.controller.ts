@@ -45,5 +45,19 @@ export const getCompaniesFroRegistration = catchAsync(
     });
   },
 );
+export const getCurrentCompany = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.company) {
+      return next(new AppError('No company found with this id', 404));
+    }
+    console.log(req.company);
+    res.status(200).json({
+      status: 'success',
+      data: {
+        document: req.company,
+      },
+    });
+  },
+);
 
 //NOTE Approve all employees to be emplemented
