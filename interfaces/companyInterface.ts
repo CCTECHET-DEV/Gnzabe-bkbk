@@ -1,6 +1,19 @@
 import { Document, Types } from 'mongoose';
 import { IAuthDocument } from './authInterface';
 
+export interface IEmployee {
+  _id: Types.ObjectId | string;
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  role: string;
+  companyId: Types.ObjectId | string;
+  departmentId: Types.ObjectId | string;
+  isActive: boolean;
+  isApproved: boolean;
+  id: Types.ObjectId | string;
+}
+
 export interface ICompany extends IAuthDocument {
   name: string;
   primaryEmail: string;
@@ -10,6 +23,9 @@ export interface ICompany extends IAuthDocument {
   passwordConfirm?: string;
   passwordChangedAt?: Date;
   logo?: string;
+
+  // virtual properties
+  employees?: IEmployee[];
 
   otp?: string;
   otpExpiry?: Date;

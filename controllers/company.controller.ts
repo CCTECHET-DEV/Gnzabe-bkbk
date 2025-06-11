@@ -10,6 +10,8 @@ import { catchAsync } from '../utilities/catchAsync';
 import { filterCompanyForRegistration } from '../utilities/helper';
 import User from '../model/userModel';
 import { AppError } from '../utilities/appError';
+import Department from '../model/departmentModel';
+import { Types } from 'mongoose';
 
 export const getAllCompanies = dbFactory.getAll(Company);
 
@@ -40,39 +42,6 @@ export const getCompaniesFroRegistration = catchAsync(
     res.status(200).json({
       status: 'success',
       data: filtered,
-    });
-  },
-);
-
-export const approveCompnayEmployee = catchAsync(
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const companyId = req.company?._id;
-    const { id } = req.params;
-    console.log(id);
-    const employee = await User.findById(id);
-    if (!employee) {
-      return next(new AppError('Employee not found', 404));
-    }
-    console.log(employee, req.company);
-    if (employee.companyId.toString() !== companyId?.toString()) {
-      return next(
-        new AppError(
-          'Unauthorized action, Employee does not belong to this company!',
-          403,
-        ),
-      );
-    }
-    if (employee.isApproved) {
-      return next(new AppError('Employee is already approved', 400));
-    }
-    employee.isApproved = true;
-    await employee.save({ validateBeforeSave: false });
-    res.status(200).json({
-      status: 'success',
-      message: 'Employee approved successfully',
-      data: {
-        document: employee,
-      },
     });
   },
 );

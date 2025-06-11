@@ -38,9 +38,28 @@ const DepartmentSchema = new Schema<IDepartment>({
   },
 
   departmentAdmin: {
-    type: Schema.Types.ObjectId,
-    unique: true, // One admin per department
-    sparse: true, // in case admin is not yet assigned
+    id: {
+      type: Schema.Types.ObjectId,
+      required: false, // Not required, can be null
+      unique: true, // One employee can only be admin for one department
+      sparse: true, // Allows multiple nulls for unique index
+      default: null,
+    },
+    name: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    email: {
+      type: String,
+      required: false,
+      default: null,
+    },
+    phoneNumber: {
+      type: String,
+      required: false,
+      default: null,
+    },
   },
 
   employees: [employeeSubSchema],
