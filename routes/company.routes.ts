@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+  approveCompnayEmployee,
   getAllCompanies,
   getCompaniesFroRegistration,
   getCompany,
@@ -14,5 +15,6 @@ router
 router.use(protectCompany);
 router.route('/').get(getAllCompanies);
 router.route('/:id').get(getCompany);
+router.route('/employee/approve/:id').post(approveCompnayEmployee);
 
 export default router;

@@ -173,7 +173,8 @@ const createOtpVerificationController = <T extends IAuthDocument>(
     if (!id || !otp || typeof id !== 'string' || typeof otp !== 'string') {
       return next(new AppError('Id and OTP are required', 400));
     }
-
+    const d = await Model.findById(id);
+    console.log(d, new Date(d?.otpExpiry!) < new Date());
     const document = await Model.findOne({
       _id: id,
       otp: otp,
