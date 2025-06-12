@@ -8,6 +8,15 @@ import Company from '../model/companyModel';
 import { cookieOptions, signToken } from '../controllers/authFactory';
 import User from '../model/userModel';
 import Department from '../model/departmentModel';
+import { IDepartment } from '../interfaces/departmentInterface';
+
+declare global {
+  namespace Express {
+    interface Request {
+      department?: IDepartment;
+    }
+  }
+}
 
 export const sanitizeInputs = (
   req: Request,
@@ -44,6 +53,10 @@ export const allowedToCompanyOrDepartmentAdmin = catchAsync(
     if (!id) {
       return next(new AppError('Department ID is required', 400));
     }
+    const department = await Department.findById(id);
+
+    if (!department) return next(new AppError('Department not found', 404));
+
     if (
       req.headers.authorization &&
       req.headers.authorization.startsWith('Bearer')
@@ -66,6 +79,7 @@ export const allowedToCompanyOrDepartmentAdmin = catchAsync(
           new AppError('Password has been changed. Please login again!', 401),
         );
       req.company = company;
+      req.department = department;
       const newToken = signToken(decoded.id, process.env.JWT_EXPIRES_IN_HOUR);
       res.cookie('jwt', newToken, cookieOptions(req));
       return next();
@@ -84,10 +98,6 @@ export const allowedToCompanyOrDepartmentAdmin = catchAsync(
       const newToken = signToken(decoded.id, process.env.JWT_EXPIRES_IN_HOUR);
       res.cookie('jwt', newToken, cookieOptions(req));
       if (employee.role === 'departmentAdmin') {
-        const department = await Department.findById(id);
-
-        if (!department) return next(new AppError('Department not found', 404));
-
         if (
           department.departmentAdmin?.id.toString() !== employee.id.toString()
         )
@@ -97,6 +107,7 @@ export const allowedToCompanyOrDepartmentAdmin = catchAsync(
               403,
             ),
           );
+        req.department = department;
         return next();
       }
       return next(new AppError('Unauthorized action', 403));

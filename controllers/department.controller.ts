@@ -118,27 +118,43 @@ export const assignDepartmentAdmin = catchAsync(
 
 export const removeEmployeeFromDepartment = catchAsync(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const { departmentId, employeeId } = req.query;
-    if (!departmentId || !employeeId) {
-      return next(
-        new AppError('Department ID and Employee ID are required', 400),
-      );
+    // const { id } = req.params;
+    const { employeeId } = req.query;
+
+    if (!employeeId) {
+      return next(new AppError('Employee ID is required', 400));
     }
 
-    const department = await Department.findById(departmentId);
+    if (req.user?.id.toString() === employeeId.toString())
+      return next(new AppError('You are not allowed to remove your self', 403));
+
+    const department = req.department;
     if (!department) {
       return next(new AppError('Department not found', 404));
     }
 
+    const employee = await User.findById(employeeId);
+    if (!employee) return next(new AppError('Employee not found!', 404));
+
     const employeeIndex = department.employees.findIndex(
       (emp) => emp.id.toString() === employeeId,
     );
+
     if (employeeIndex === -1) {
       return next(new AppError('Employee not found in this department', 404));
     }
+    if (department.departmentAdmin?.id.toString() === employeeId)
+      return next(
+        new AppError(
+          'Cannot remove department admin from the department. Please revoke admin preivilage fisrt.',
+          400,
+        ),
+      );
 
     department.employees.splice(employeeIndex, 1);
-    await department.save();
+    employee.departmentId = null;
+    await department.save({ validateBeforeSave: false });
+    await employee.save({ validateBeforeSave: false });
 
     res.status(200).json({
       status: 'success',

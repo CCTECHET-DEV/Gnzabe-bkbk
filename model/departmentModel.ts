@@ -83,11 +83,10 @@ const DepartmentSchema = new Schema<IDepartment>({
 // Ensure department name is unique within a company
 DepartmentSchema.index({ companyId: 1, name: 1 }, { unique: true });
 
-// This allows only one document where departmentAdmin.id = X
-// but ignores documents where departmentAdmin.id is null
+// Unique index for departmentAdmin.id, only when departmentAdmin.id is not null
 DepartmentSchema.index(
   { 'departmentAdmin.id': 1 },
-  { unique: true, sparse: true },
+  { unique: true, partialFilterExpression: { 'departmentAdmin.id': { $type: 'objectId' } } }
 );
 
 const Department: Model<IDepartment> = cloudConnection.model<IDepartment>(

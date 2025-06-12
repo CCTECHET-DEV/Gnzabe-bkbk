@@ -17,7 +17,7 @@ export interface IUser extends IAuthDocument {
 
   role: 'employee' | 'departmentAdmin';
   companyId: Types.ObjectId;
-  departmentId: Types.ObjectId;
+  departmentId: Types.ObjectId | null;
   isApproved: boolean;
   isVerified: boolean;
   verificationToken?: string;
