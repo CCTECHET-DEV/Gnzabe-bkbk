@@ -41,8 +41,6 @@ const DepartmentSchema = new Schema<IDepartment>({
     id: {
       type: Schema.Types.ObjectId,
       required: false, // Not required, can be null
-      unique: true, // One employee can only be admin for one department
-      sparse: true, // Allows multiple nulls for unique index
       default: null,
     },
     name: {
@@ -84,6 +82,13 @@ const DepartmentSchema = new Schema<IDepartment>({
 
 // Ensure department name is unique within a company
 DepartmentSchema.index({ companyId: 1, name: 1 }, { unique: true });
+
+// This allows only one document where departmentAdmin.id = X
+// but ignores documents where departmentAdmin.id is null
+DepartmentSchema.index(
+  { 'departmentAdmin.id': 1 },
+  { unique: true, sparse: true },
+);
 
 const Department: Model<IDepartment> = cloudConnection.model<IDepartment>(
   'Department',
