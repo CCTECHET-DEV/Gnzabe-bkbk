@@ -25,6 +25,7 @@ const allowedOrigins = [
   'http://localhost:5174',
   'http://192.168.2.249:5173',
   'https://gnzabe.com',
+  'https://production.gnzabe.com',
   'https://gnzabe-security-training.netlify.app',
   'https://gnzabe-security-training1.netlify.app',
   'https://gnzabe-security-training2.netlify.app',

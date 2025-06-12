@@ -2,7 +2,6 @@ import express from 'express';
 import {
   assignDepartmentAdmin,
   createDepartment,
-  getAllDepartments,
 } from '../controllers/department.controller';
 import { protectCompany } from '../middlewares/auth.company.middleware';
 

@@ -7,7 +7,7 @@ import Company from '../model/companyModel';
 import { Types } from 'mongoose';
 import User from '../model/userModel';
 
-export const getAllDepartments = dbFactory.getAll(Department);
+// export const getAllDepartments = dbFactory.getAll(Department);
 export const getDepartment = dbFactory.getOne(Department);
 
 export const createDepartment = catchAsync(
@@ -109,6 +109,40 @@ export const assignDepartmentAdmin = catchAsync(
     res.status(200).json({
       status: 'success',
       message: 'Department admin assigned successfully',
+      data: {
+        document: department,
+      },
+    });
+  },
+);
+
+export const removeEmployeeFromDepartment = catchAsync(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { departmentId, employeeId } = req.query;
+    if (!departmentId || !employeeId) {
+      return next(
+        new AppError('Department ID and Employee ID are required', 400),
+      );
+    }
+
+    const department = await Department.findById(departmentId);
+    if (!department) {
+      return next(new AppError('Department not found', 404));
+    }
+
+    const employeeIndex = department.employees.findIndex(
+      (emp) => emp.id.toString() === employeeId,
+    );
+    if (employeeIndex === -1) {
+      return next(new AppError('Employee not found in this department', 404));
+    }
+
+    department.employees.splice(employeeIndex, 1);
+    await department.save();
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Employee removed from department successfully',
       data: {
         document: department,
       },
