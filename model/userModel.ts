@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import { IUser } from '../interfaces/userInterface';
 import { localConnection } from '../config/dbConfig';
 
-const userSchema = new Schema<IUser>(
+export const userSchema = new Schema<IUser>(
   {
     fullName: {
       type: String,
