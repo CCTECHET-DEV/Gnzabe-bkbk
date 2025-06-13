@@ -20,7 +20,8 @@ export const watchUserChanges = () => {
       // 1. Update departmentAdmin if user is a department admin
       // console.log(updatedUser);
       if (
-        updatedUser._id.toString() === department.departmentAdmin?.id.toString()
+        updatedUser._id.toString() ===
+        department.departmentAdmin?.id?.toString()
       ) {
         if (updatedUser.role === 'departmentAdmin')
           department.departmentAdmin = {
@@ -45,6 +46,17 @@ export const watchUserChanges = () => {
         employee.name = updatedUser.fullName;
         employee.email = updatedUser.email;
         employee.role = updatedUser.role; // Could be admin or employee
+      } else {
+        // Add to employees if not found
+        department.employees.push({
+          id: updatedUser._id,
+          name: updatedUser.fullName,
+          email: updatedUser.email,
+          role: updatedUser.role,
+        });
+        console.log(
+          `Added new employee ${updatedUser.fullName} to department ${department.name}`,
+        );
       }
 
       await department.save();

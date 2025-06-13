@@ -94,6 +94,7 @@ export const allowedToCompanyOrDepartmentAdmin = catchAsync(
         return next(
           new AppError('Password has been changed. Please login again!', 401),
         );
+
       req.user = employee;
       const newToken = signToken(decoded.id, process.env.JWT_EXPIRES_IN_HOUR);
       res.cookie('jwt', newToken, cookieOptions(req));

@@ -197,7 +197,7 @@ export const removeEmployeeFromDepartment = catchAsync(
     if (employeeIndex === -1) {
       return next(new AppError('Employee not found in this department', 404));
     }
-    if (department.departmentAdmin?.id.toString() === employeeId)
+    if (department?.departmentAdmin?.id?.toString() === employeeId)
       return next(
         new AppError(
           'Cannot remove department admin from the department. Please revoke admin preivilage fisrt.',
@@ -215,6 +215,68 @@ export const removeEmployeeFromDepartment = catchAsync(
       message: 'Employee removed from department successfully',
       data: {
         document: department,
+      },
+    });
+  },
+);
+
+export const addEmployeeToDepartment = catchAsync(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { employeeId, departmentId } = req.query;
+    if (!employeeId) {
+      return next(new AppError('Employee ID is required', 400));
+    }
+
+    const department = await Department.findById(departmentId);
+    if (!department) {
+      return next(new AppError('Department not found', 404));
+    }
+
+    const company = req.company;
+    if (!company) {
+      return next(new AppError('Company not found', 404));
+    }
+
+    const doesEmployeeBelongToCompany = company?.employees?.find(
+      (employee) => employee.id.toString() === employeeId,
+    );
+
+    if (!doesEmployeeBelongToCompany) {
+      return next(
+        new AppError(
+          'Unauthorized action, Employee does not belong to this company!',
+          403,
+        ),
+      );
+    }
+
+    const doesDepartmentBelongToCompany = company?.departments?.find(
+      (dept) => dept.id.toString() === department.id.toString(),
+    );
+    if (!doesDepartmentBelongToCompany) {
+      return next(
+        new AppError(
+          'Unauthorized action, Department does not belong to this company!',
+          403,
+        ),
+      );
+    }
+
+    const employee = await User.findById(employeeId);
+    if (!employee) return next(new AppError('Employee not found!', 404));
+
+    if (employee.departmentId) {
+      return next(new AppError('Employee already assigned to department', 400));
+    }
+
+    employee.departmentId = department.id;
+    await employee.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Employee added to department successfully',
+      data: {
+        document: employee,
       },
     });
   },
