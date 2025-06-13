@@ -10,38 +10,35 @@ import User from '../model/userModel';
 // export const getAllDepartments = dbFactory.getAll(Department);
 export const getDepartment = dbFactory.getOne(Department);
 
-export const createDepartment = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const companyId = req.company?._id;
-    if (!companyId) return next(new AppError('Company ID is required', 400));
-    const company = await Company.findById(companyId);
-    const { name } = req.body;
+// export const createDepartment = catchAsync(
+//   async (req: Request, res: Response, next: NextFunction) => {
+//     const companyId = req.company?._id;
+//     if (!companyId) return next(new AppError('Company ID is required', 400));
+//     const company = await Company.findById(companyId);
+//     const { name } = req.body;
 
-    const department = await Department.create({ name, companyId });
+//     const department = await Department.create({ name, companyId });
 
-    company!.departments.push({ id: department.id, name: department.name });
-    await company!.save();
+//     company!.departments.push({ id: department.id, name: department.name });
+//     await company!.save();
 
-    res.status(201).json({
-      status: 'success',
-      message: 'Department created successfully',
-      data: {
-        department,
-      },
-    });
-  },
-);
+//     res.status(201).json({
+//       status: 'success',
+//       message: 'Department created successfully',
+//       data: {
+//         department,
+//       },
+//     });
+//   },
+// );
+export const createDepartment = dbFactory.createOne(Department);
 
 export const assignDepartmentAdmin = catchAsync(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     console.log('high');
     console.log('req.query:', req.query); // Debugging line
     const { departmentId, employeeId } = req.query;
-    const company = await Company.findById(req.company?._id).populate({
-      path: 'employees',
-      select:
-        '_id fullName email phoneNumber role departmentId isActive isApproved',
-    }); // Populate employees with specific fields
+    const company = req.company; // Populate employees with specific fields
     console.log(company);
     if (!company) {
       return next(new AppError('Company not found', 404));
@@ -74,6 +71,12 @@ export const assignDepartmentAdmin = catchAsync(
     if (!employee) {
       return next(new AppError('Employee not found', 404));
     }
+    // if (!employee.isVerified) {
+    //   return next(new AppError('Employee is not verified', 403));
+    // }
+    // if (!employee.isApproved) {
+    //   return next(new AppError('Employee is not approved by company', 403));
+    // }
     if (employee.departmentId?.toString() !== departmentId) {
       return next(
         new AppError(
@@ -109,6 +112,57 @@ export const assignDepartmentAdmin = catchAsync(
     res.status(200).json({
       status: 'success',
       message: 'Department admin assigned successfully',
+      data: {
+        document: department,
+      },
+    });
+  },
+);
+
+export const revokeDepartmentAdmin = catchAsync(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { departmentId, employeeId } = req.query;
+    const company = req.company;
+
+    if (!company) {
+      return next(new AppError('Company not found', 404));
+    }
+
+    const department = await Department.findById(departmentId);
+    if (!department) {
+      return next(new AppError('Department not found', 404));
+    }
+
+    if (department.departmentAdmin?.id.toString() !== employeeId) {
+      return next(
+        new AppError(
+          'Unauthorized action, Employee is not the department admin of this department!',
+          403,
+        ),
+      );
+    }
+
+    const isDeparmtentBelognToCompany = company.departments.find(
+      (department) => department.id.toString() === departmentId,
+    );
+    if (!isDeparmtentBelognToCompany) {
+      return next(
+        new AppError(
+          'Unauthorized action, Department does not belong to this company!',
+          403,
+        ),
+      );
+    }
+
+    const employee = await User.findById(employeeId);
+    if (!employee) {
+      return next(new AppError('Employee not found', 404));
+    }
+    employee.role = 'employee';
+    employee.save({ validateBeforeSave: false });
+    res.status(200).json({
+      status: 'success',
+      message: 'Department admin revoked successfully',
       data: {
         document: department,
       },

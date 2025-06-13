@@ -115,3 +115,10 @@ export const allowedToCompanyOrDepartmentAdmin = catchAsync(
     next(new AppError('Unauthorized action', 403));
   },
 );
+
+export const addCompanyIdToRequest = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    req.body.companyId = req.company?._id;
+    next();
+  },
+);

@@ -54,3 +54,30 @@ export const approveUser = catchAsync(
     });
   },
 );
+
+export const updateMe = catchAsync(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const id = req.user!._id;
+    if (id !== req.user?._id) {
+      return next(new AppError('You can only update your own profile', 403));
+    }
+    const { fullName, photo } = req.body;
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { fullName, photo },
+      {
+        new: true,
+        runValidators: false,
+      },
+    );
+    if (!updatedUser) {
+      return next(new AppError('User not found', 404));
+    }
+    res.status(200).json({
+      status: 'success',
+      data: {
+        document: updatedUser,
+      },
+    });
+  },
+);

@@ -19,7 +19,13 @@ let server: any;
   // Import app only after DB connection is established
   const app = (await import('./app')).default;
   const setupCronJobs = (await import('./jobs')).default;
+  const watchUserChanges = (await import('./watchers/userWatchers'))
+    .watchUserChanges;
+  const watchDepartmentChanges = (await import('./watchers/departmentWatcher'))
+    .watchDepartmentChanges;
   setupCronJobs();
+  watchUserChanges();
+  watchDepartmentChanges();
 
   server = app.listen(process.env.PORT!, () => {
     console.log(`server is running on port ${process.env.PORT}`);

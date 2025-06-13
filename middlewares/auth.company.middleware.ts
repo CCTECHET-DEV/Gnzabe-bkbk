@@ -30,9 +30,14 @@ export const protectCompany = catchAsync(
 
     const decoded = await promisify(Jwt.verify)(token, process.env.JWT_SECRET);
 
-    const company = await Company.findById(decoded.id).select(
-      '+passwordChangedAt',
-    );
+    const company = await Company.findById(decoded.id)
+      .select('+passwordChangedAt')
+      .populate({
+        path: 'employees',
+        select:
+          '_id fullName email phoneNumber role departmentId isActive isApproved',
+      });
+
     if (!company)
       return next(
         new AppError(
