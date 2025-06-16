@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import useragent from 'express-useragent';
 import Jwt from 'jsonwebtoken';
 import xss from 'xss';
+import geoip from 'geoip-lite';
 import { catchAsync } from '../utilities/catchAsync';
 import { AppError } from '../utilities/appError';
 const { promisify } = require('util');
@@ -63,9 +64,11 @@ export const attachRequestMeta = (
   // Use express-useragent
   const source = req.headers['user-agent'] || '';
   const ua = useragent.parse(source);
+  const geo = geoip.lookup(ip);
 
   req.requestMetaData = {
     ip,
+    location: geo || undefined,
     device: {
       source,
       browser: ua.browser,
@@ -76,6 +79,8 @@ export const attachRequestMeta = (
       isDesktop: ua.isDesktop,
     },
   };
+
+  console.log(req.requestMetaData, ' Request Meta Data');
 
   next();
 };

@@ -37,7 +37,7 @@ const allowedOrigins = [
 ];
 
 const app = express();
-
+app.set('trust proxy', 1);
 app.use(useragent.express()); // Required for parsing user-agent
 app.use(attachRequestMeta);
 

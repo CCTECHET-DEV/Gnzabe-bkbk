@@ -53,6 +53,31 @@ const auditLogSchema = new Schema<IAuditLog>(
       ip: {
         type: String,
       },
+      location: {
+        range: [Number],
+        country: {
+          type: String,
+        },
+        region: {
+          type: String,
+        },
+        city: {
+          type: String,
+        },
+        ll: {
+          type: [Number],
+          validate: {
+            validator: (arr: number[]) => arr.length === 2,
+            message: 'll must be an array of two numbers',
+          },
+        },
+        metro: {
+          type: Number,
+        },
+        zip: {
+          type: String,
+        },
+      },
       device: {
         source: {
           type: String,
