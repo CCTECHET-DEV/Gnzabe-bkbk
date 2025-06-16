@@ -31,6 +31,6 @@ export function filterCompanyForRegistration(company: ICompany) {
   return {
     id: company._id,
     name: company.name,
-    departments: company.departments,
+    departments: company.departments?.filter((dept: any) => dept.isActive),
   };
 }
