@@ -8,10 +8,7 @@ import dbFactory from '../dbOperations/dbFactory';
 import Company from '../model/companyModel';
 import { catchAsync } from '../utilities/catchAsync';
 import { filterCompanyForRegistration } from '../utilities/helper';
-import User from '../model/userModel';
 import { AppError } from '../utilities/appError';
-import Department from '../model/departmentModel';
-import { Types } from 'mongoose';
 
 export const getAllCompanies = dbFactory.getAll(Company);
 

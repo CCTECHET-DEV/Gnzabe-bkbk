@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import useragent from 'express-useragent';
 import Jwt from 'jsonwebtoken';
 import xss from 'xss';
 import { catchAsync } from '../utilities/catchAsync';
@@ -9,11 +10,13 @@ import { cookieOptions, signToken } from '../controllers/authFactory';
 import User from '../model/userModel';
 import Department from '../model/departmentModel';
 import { IDepartment } from '../interfaces/departmentInterface';
+import { IRequestMetaData } from '../interfaces/requestMetaDataInterface';
 
 declare global {
   namespace Express {
     interface Request {
       department?: IDepartment;
+      requestMetaData?: IRequestMetaData;
     }
   }
 }
@@ -42,6 +45,37 @@ export const sanitizeInputs = (
   sanitize(req.body);
   sanitize(req.query);
   sanitize(req.params);
+
+  next();
+};
+
+export const attachRequestMeta = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  // IP address (handles reverse proxy setups like Nginx)
+  const ip =
+    req.headers['x-forwarded-for']?.toString().split(',').shift() ||
+    req.socket.remoteAddress ||
+    '';
+
+  // Use express-useragent
+  const source = req.headers['user-agent'] || '';
+  const ua = useragent.parse(source);
+
+  req.requestMetaData = {
+    ip,
+    device: {
+      source,
+      browser: ua.browser,
+      version: ua.version,
+      os: ua.os,
+      platform: ua.platform,
+      isMobile: ua.isMobile,
+      isDesktop: ua.isDesktop,
+    },
+  };
 
   next();
 };

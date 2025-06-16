@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import express from 'express';
+import useragent from 'express-useragent';
 import morogan from 'morgan';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
@@ -18,7 +19,7 @@ import authRouter from './routes/auth.routes';
 // import TutorialRouter from './routes/tutorialRoutes';
 // import QuizRouter from './routes/quizRoutes';
 import globalErrorHandler from './controllers/error.controller';
-import { sanitizeInputs } from './middlewares/middlewares';
+import { attachRequestMeta, sanitizeInputs } from './middlewares/middlewares';
 
 const allowedOrigins = [
   'http://localhost:5173',
@@ -36,6 +37,9 @@ const allowedOrigins = [
 ];
 
 const app = express();
+
+app.use(useragent.express()); // Required for parsing user-agent
+app.use(attachRequestMeta);
 
 app.use(morogan('dev'));
 // app.use(express.static(path.join(__dirname, 'public')));

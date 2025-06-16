@@ -6,6 +6,9 @@ import { Request, Response, NextFunction } from 'express';
 import Company from '../model/companyModel';
 import { Types } from 'mongoose';
 import User from '../model/userModel';
+import { createAuditLog } from './auditLog.controller';
+import { logAction } from '../utilities/auditLogger';
+import { timeStamp } from 'console';
 
 // export const getAllDepartments = dbFactory.getAll(Department);
 export const getDepartment = dbFactory.getOne(Department);
@@ -294,6 +297,19 @@ export const deactiveDepartment = catchAsync(
     }
     department.isActive = false;
     await department.save({ validateBeforeSave: false });
+    await logAction(next, {
+      performedBy: {
+        id: req.company?._id as Types.ObjectId,
+        name: req.company?.name,
+        email: req.user?.email,
+      },
+      action: 'DEACTIVATE_DEPARTMENT',
+      departmentId: department._id as Types.ObjectId,
+      companyId: req.company?._id as Types.ObjectId,
+      timeStamp: new Date(),
+      requestMetadData: req.requestMetaData,
+    });
+    console.log('account deactivated');
     res.status(200).json({
       status: 'success',
       message: 'Department deactivated successfully',
@@ -316,6 +332,7 @@ export const activateDepartment = catchAsync(
     }
     department.isActive = true;
     await department.save({ validateBeforeSave: false });
+
     res.status(200).json({
       status: 'success',
       message: 'Department activated successfully',

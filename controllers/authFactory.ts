@@ -11,10 +11,8 @@ import {
   sendPasswordResetEmail,
   sendVerificationEmail,
 } from '../services/email.service';
-import { Session } from '../model/sessionModel';
 import { generateOtp } from '../utilities/helper';
 import axios from 'axios';
-import { create } from 'domain';
 import Department from '../model/departmentModel';
 
 interface SignupControllerOptions {
