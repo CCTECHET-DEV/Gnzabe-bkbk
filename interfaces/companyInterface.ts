@@ -45,6 +45,7 @@ export interface ICompany extends IAuthDocument {
   departments: {
     id: Types.ObjectId;
     name: string;
+    isActive: boolean;
   }[]; // References to Department documents
 
   preferences: {

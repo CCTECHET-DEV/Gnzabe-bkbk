@@ -14,6 +14,10 @@ const departmentSubSchema = new Schema(
       type: String,
       required: true,
     },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   { _id: false }, // 🚫 disables auto _id for each department item
 );

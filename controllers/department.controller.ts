@@ -281,3 +281,47 @@ export const addEmployeeToDepartment = catchAsync(
     });
   },
 );
+
+export const deactiveDepartment = catchAsync(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const departmentId = req.query.departmentId || req.params.id;
+    const department = await Department.findById(departmentId);
+    if (!department) {
+      return next(new AppError('Department not found', 404));
+    }
+    if (department.isActive === false) {
+      return next(new AppError('Department is already deactivated', 400));
+    }
+    department.isActive = false;
+    await department.save({ validateBeforeSave: false });
+    res.status(200).json({
+      status: 'success',
+      message: 'Department deactivated successfully',
+      data: {
+        document: department,
+      },
+    });
+  },
+);
+
+export const activateDepartment = catchAsync(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const departmentId = req.query.departmentId || req.params.id;
+    const department = await Department.findById(departmentId);
+    if (!department) {
+      return next(new AppError('Department not found', 404));
+    }
+    if (department.isActive === true) {
+      return next(new AppError('Department is already active', 400));
+    }
+    department.isActive = true;
+    await department.save({ validateBeforeSave: false });
+    res.status(200).json({
+      status: 'success',
+      message: 'Department activated successfully',
+      data: {
+        document: department,
+      },
+    });
+  },
+);

@@ -13,7 +13,11 @@ export const watchDepartmentChanges = () => {
         case 'insert':
           await Company.findByIdAndUpdate(dept.companyId, {
             $addToSet: {
-              departments: { id: dept._id, name: dept.name },
+              departments: {
+                id: dept._id,
+                name: dept.name,
+                isActive: dept.isActive,
+              },
             },
           });
           console.log(`➕ Department added to company: ${dept.name}`);
@@ -27,11 +31,12 @@ export const watchDepartmentChanges = () => {
             {
               $set: {
                 'departments.$.name': dept.name,
+                'departments.$.isActive': dept.isActive,
               },
             },
           );
 
-          console.log(`✏️ Department name updated in company: ${dept.name}`);
+          console.log(`✏️ Department updated in company: ${dept.name}`);
           break;
 
         case 'delete':

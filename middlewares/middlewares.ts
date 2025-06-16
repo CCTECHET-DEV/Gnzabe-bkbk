@@ -123,3 +123,61 @@ export const addCompanyIdToRequest = catchAsync(
     next();
   },
 );
+
+export const doesEmployeeBelongToCompany = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { employeeId } = req.query;
+    if (!employeeId) {
+      return next(new AppError('Employee ID is required', 400));
+    }
+
+    const employee = await User.findById(employeeId);
+    if (!employee) {
+      return next(new AppError('Employee not found', 404));
+    }
+
+    if (!req.company || !req.company._id) {
+      return next(new AppError('Company context missing in request', 500));
+    }
+
+    if (employee.companyId.toString() !== req.company._id.toString()) {
+      return next(
+        new AppError(
+          'Unauthorized action, Employee does not belong to this company!',
+          403,
+        ),
+      );
+    }
+
+    next();
+  },
+);
+
+export const doesDepartmentBelongToCompany = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const departmentId = req.query.departmentId || req.params.id;
+
+    if (!departmentId) {
+      return next(new AppError('Department ID is required', 400));
+    }
+
+    if (!req.company || !req.company._id) {
+      return next(new AppError('Company context missing in request', 500));
+    }
+
+    const isDepartmentBelongsToCompany = req.company.departments.find(
+      (department) => department.id.toString() === departmentId.toString(),
+    );
+
+    if (!isDepartmentBelongsToCompany) {
+      return next(
+        new AppError(
+          'Unauthorized action, Department does not belong to this company!',
+          403,
+        ),
+      );
+    }
+
+    next();
+  },
+);
