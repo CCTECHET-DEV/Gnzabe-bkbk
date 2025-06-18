@@ -1,8 +1,16 @@
+import http from 'http';
 import dotenv from 'dotenv';
 dotenv.config({
   path: './config.env',
 });
 import connectToDatabase from './config/dbConfig';
+import { Server } from 'socket.io';
+
+declare global {
+  // Add the io property to globalThis
+  // eslint-disable-next-line no-var
+  var io: Server;
+}
 
 process.on('uncaughtException', (error: Error) => {
   console.log('UncaughtException shutting down...');
@@ -10,7 +18,7 @@ process.on('uncaughtException', (error: Error) => {
   process.exit(1);
 });
 
-let server: any;
+let server: http.Server;
 
 (async () => {
   await connectToDatabase();
@@ -23,6 +31,36 @@ let server: any;
     .watchUserChanges;
   const watchDepartmentChanges = (await import('./watchers/departmentWatcher'))
     .watchDepartmentChanges;
+
+  server = http.createServer(app);
+  const io = new Server(server, {
+    cors: {
+      origin: [
+        'http://localhost:5173',
+        'http://localhost:5174',
+        'https://gnzabe.com',
+        'https://production.gnzabe.com',
+        // other origins if needed
+      ],
+      credentials: true,
+    },
+  });
+
+  io.on('connection', (socket) => {
+    console.log('New client connected:', socket.id);
+
+    // Example: Notify user-specific messages
+    socket.on('joinRoom', (roomId) => {
+      socket.join(roomId);
+      console.log(`Socket ${socket.id} joined room ${roomId}`);
+    });
+
+    socket.on('disconnect', () => {
+      console.log('Client disconnected:', socket.id);
+    });
+  });
+  globalThis.io = io;
+
   setupCronJobs();
   watchUserChanges();
   watchDepartmentChanges();

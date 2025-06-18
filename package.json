@@ -36,6 +36,7 @@
     "otp-generator": "^4.0.1",
     "sharp": "^0.34.1",
     "slugify": "^1.6.6",
+    "socket.io": "^4.8.1",
     "uuid": "^11.1.0",
     "validator": "^13.15.0",
     "xss": "^1.0.15",
