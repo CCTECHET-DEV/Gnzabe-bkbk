@@ -5,6 +5,7 @@ import {
   assignDepartmentAdmin,
   createDepartment,
   deactiveDepartment,
+  getDepartment,
   removeEmployeeFromDepartment,
   revokeDepartmentAdmin,
 } from '../controllers/department.controller';
@@ -17,6 +18,7 @@ import {
 
 const router = express.Router();
 
+router.route('/:id').get(allowedToCompanyOrDepartmentAdmin, getDepartment);
 router
   .route('/remove-employee')
   .post(allowedToCompanyOrDepartmentAdmin, removeEmployeeFromDepartment);

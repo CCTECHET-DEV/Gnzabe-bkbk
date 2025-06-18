@@ -7,6 +7,7 @@ import { catchAsync } from '../utilities/catchAsync';
 import { Model } from 'mongoose';
 import { IAuthDocument } from '../interfaces/authInterface';
 import {
+  sendEmailApprovalRequest,
   sendOtpEmail,
   sendPasswordResetEmail,
   sendVerificationEmail,
@@ -19,14 +20,6 @@ interface SignupControllerOptions {
   allowedFields?: string[];
   emailField: string;
   nameField?: string;
-  sendVerificationEmail?: (
-    req: Request,
-    email: string,
-    id: string,
-    token: string,
-    name?: string,
-  ) => Promise<void>;
-  sendOtp?: (email: string, otp: string, name?: string) => Promise<void>;
 }
 
 const createSignupController = <T extends IAuthDocument>(
@@ -65,7 +58,16 @@ const createSignupController = <T extends IAuthDocument>(
       role: document?.role,
     });
     department?.save({ validateBeforeSave: false });
-    console.log('after push');
+    // console.log('after push');
+
+    if (department?.departmentAdmin?.email) {
+      await sendEmailApprovalRequest(
+        department.departmentAdmin?.name,
+        department.departmentAdmin?.email,
+        document?.email,
+        document?.fullName,
+      );
+    }
 
     // // ✅ Create session
     // await Session.findOneAndUpdate(
@@ -78,13 +80,13 @@ const createSignupController = <T extends IAuthDocument>(
     const userId = (document._id as string).toString();
     const accessToken = signToken(userId, process.env.JWT_EXPIRES_IN_HOUR);
 
-    if (options.sendVerificationEmail) {
+    if (sendVerificationEmail) {
       const email = (document as any)[options.emailField];
       const name = options.nameField
         ? (document as any)[options.nameField]
         : undefined;
 
-      await options.sendVerificationEmail(
+      await sendVerificationEmail(
         req,
         email,
         (document._id as string).toString(),
@@ -139,7 +141,7 @@ const createVerificationController = <T extends IAuthDocument>(
     if (document.verificationTokenExpiry!.getTime() < Date.now()) {
       const newToken = document.createVerificationToken();
       await document.save({ validateBeforeSave: false });
-      sendVerificationEmail(
+      await sendVerificationEmail(
         req,
         document.email || document.primaryEmail,
         id,

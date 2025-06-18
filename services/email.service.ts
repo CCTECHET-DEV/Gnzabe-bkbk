@@ -16,6 +16,11 @@ import {
   resetPasswordSender,
   resetPasswordSubject,
 } from '../views/email/passwordResetEmail';
+import {
+  approvalRequestContent,
+  approvalRequestSender,
+  approvalRequestSubject,
+} from '../views/email/approveEmployeeRequest';
 
 // console.log(brevo, 'brevo');
 
@@ -120,6 +125,7 @@ export const sendPasswordResetEmail = async (
   await mailer.send();
   console.log('Password reset email sent to:', email);
 };
+
 export const sendOtpEmail = async (
   email: string,
   otp: string,
@@ -134,4 +140,21 @@ export const sendOtpEmail = async (
 
   await mailer.send();
   console.log('OTP has been sent to email: ', email);
+};
+
+export const sendEmailApprovalRequest = async (
+  departmentAdminName: string,
+  departmentAdminEmail: string,
+  employeeEmail: string,
+  employeeName: string,
+): Promise<void> => {
+  const mailer = new EmailSender({
+    subject: approvalRequestSubject,
+    sender: approvalRequestSender,
+    htmlContent: approvalRequestContent(departmentAdminName, employeeEmail),
+    to: [{ name: employeeName, email: departmentAdminEmail }],
+  });
+
+  await mailer.send();
+  console.log('Approval request email sent to:', departmentAdminEmail);
 };

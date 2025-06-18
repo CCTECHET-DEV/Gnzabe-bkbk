@@ -17,15 +17,6 @@ export const signupCompany = authFactory.createSignupController<ICompany>(
 
     emailField: 'primaryEmail',
     nameField: 'name',
-    sendVerificationEmail: async (
-      req,
-      email,
-      companyId,
-      verificationUrl,
-      name,
-    ) => {
-      await sendVerificationEmail(req, email, companyId, verificationUrl, name);
-    },
   },
 );
 

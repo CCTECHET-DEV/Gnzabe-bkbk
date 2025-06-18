@@ -15,12 +15,6 @@ export const signupUser = authFactory.createSignupController<IUser>(User, {
   ],
   emailField: 'email',
   nameField: 'fullName',
-  sendVerificationEmail: async (req, email, userId, token, name) => {
-    await sendVerificationEmail(req, email, userId, token, name);
-  },
-  sendOtp: async (email, otp, name) => {
-    await sendOtpEmail(email, otp, name);
-  },
 });
 export const verifyUser = authFactory.createVerificationController(User);
 export const loginUser = authFactory.createLoginController<IUser>(

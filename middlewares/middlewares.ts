@@ -88,7 +88,11 @@ export const attachRequestMeta = (
 export const allowedToCompanyOrDepartmentAdmin = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     let token;
-    const { departmentId } = req.query;
+    // NOTE added request param
+    let { departmentId } = req.query;
+    if (!departmentId) {
+      departmentId = req.params.id;
+    }
     if (!departmentId) {
       return next(new AppError('Department ID is required', 400));
     }
