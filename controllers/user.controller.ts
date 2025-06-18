@@ -92,7 +92,7 @@ export const disApproveUser = catchAsync(
     await employee.save({ validateBeforeSave: false });
 
     // Log the disapproval action
-    const error = await logAction(next, {
+    const error = await logAction({
       performedBy: {
         id:
           (req.company?._id as Types.ObjectId) ||

@@ -112,6 +112,21 @@ export const assignDepartmentAdmin = catchAsync(
     department.save({ validateBeforeSave: false });
     employee.role = 'departmentAdmin';
     employee.save({ validateBeforeSave: false });
+    const error = await logAction({
+      performedBy: {
+        id: req.company?._id as Types.ObjectId,
+        name: req.company?.name,
+        email: req.user?.email,
+      },
+      action: 'ASSIGN_DEPARTMENT_ADMIN',
+      departmentId: department._id as Types.ObjectId,
+      companyId: req.company?._id as Types.ObjectId,
+      timeStamp: new Date(),
+      requestMetadData: req.requestMetaData,
+    });
+    if (error) {
+      return next(error);
+    }
     res.status(200).json({
       status: 'success',
       message: 'Department admin assigned successfully',
@@ -163,6 +178,23 @@ export const revokeDepartmentAdmin = catchAsync(
     }
     employee.role = 'employee';
     employee.save({ validateBeforeSave: false });
+
+    const error = await logAction({
+      performedBy: {
+        id: req.company?._id as Types.ObjectId,
+        name: req.company?.name,
+        email: req.user?.email,
+      },
+      action: 'REVOKE_DEPARTMENT_ADMIN',
+      departmentId: department._id as Types.ObjectId,
+      companyId: req.company?._id as Types.ObjectId,
+      timeStamp: new Date(),
+      requestMetadData: req.requestMetaData,
+    });
+    if (error) {
+      return next(error);
+    }
+
     res.status(200).json({
       status: 'success',
       message: 'Department admin revoked successfully',
@@ -212,6 +244,22 @@ export const removeEmployeeFromDepartment = catchAsync(
     employee.departmentId = null;
     await department.save({ validateBeforeSave: false });
     await employee.save({ validateBeforeSave: false });
+
+    const error = await logAction({
+      performedBy: {
+        id: req.company?._id as Types.ObjectId,
+        name: req.company?.name,
+        email: req.user?.email,
+      },
+      action: 'REMOVE_EMPLOYEE_FROM_DEPARTMENT',
+      departmentId: department._id as Types.ObjectId,
+      companyId: req.company?._id as Types.ObjectId,
+      timeStamp: new Date(),
+      requestMetadData: req.requestMetaData,
+    });
+    if (error) {
+      return next(error);
+    }
 
     res.status(200).json({
       status: 'success',
@@ -297,7 +345,7 @@ export const deactiveDepartment = catchAsync(
     }
     department.isActive = false;
     await department.save({ validateBeforeSave: false });
-    const error = await logAction(next, {
+    const error = await logAction({
       performedBy: {
         id: req.company?._id as Types.ObjectId,
         name: req.company?.name,
@@ -335,6 +383,21 @@ export const activateDepartment = catchAsync(
     }
     department.isActive = true;
     await department.save({ validateBeforeSave: false });
+    const error = await logAction({
+      performedBy: {
+        id: req.company?._id as Types.ObjectId,
+        name: req.company?.name,
+        email: req.user?.email,
+      },
+      action: 'ACTIVATE_DEPARTMENT',
+      departmentId: department._id as Types.ObjectId,
+      companyId: req.company?._id as Types.ObjectId,
+      timeStamp: new Date(),
+      requestMetadData: req.requestMetaData,
+    });
+    if (error) {
+      return next(error);
+    }
 
     res.status(200).json({
       status: 'success',

@@ -3,10 +3,7 @@ import { IAuditLog } from '../interfaces/auditLogInterface';
 import AuditLog from '../model/auditLogModel';
 import { AppError } from './appError';
 
-export const logAction = async (
-  next: NextFunction,
-  params: any,
-): Promise<Error | null> => {
+export const logAction = async (params: any): Promise<Error | null> => {
   try {
     await AuditLog.create(params);
     return null;

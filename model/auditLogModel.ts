@@ -24,7 +24,7 @@ const auditLogSchema = new Schema<IAuditLog>(
         'CREATE_DEPARTMENT',
         'ASSIGN_DEPARTMENT_ADMIN',
         'REVOKE_DEPARTMENT_ADMIN',
-        'REMOVE_EMPLOYEE',
+        'REMOVE_EMPLOYEE_FROM_DEPARTMENT',
         'ADD_EMPLOYEE',
         'ACTIVATE_DEPARTMENT',
         'DEACTIVATE_DEPARTMENT',
