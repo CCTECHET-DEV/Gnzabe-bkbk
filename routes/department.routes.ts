@@ -18,7 +18,7 @@ import {
 const router = express.Router();
 
 router
-  .route('/remove-employee/:id')
+  .route('/remove-employee')
   .post(allowedToCompanyOrDepartmentAdmin, removeEmployeeFromDepartment);
 // router.use()
 // router.use(allowedToCompanyOrDepartmentAdmin)

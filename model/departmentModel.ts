@@ -86,7 +86,10 @@ DepartmentSchema.index({ companyId: 1, name: 1 }, { unique: true });
 // Unique index for departmentAdmin.id, only when departmentAdmin.id is not null
 DepartmentSchema.index(
   { 'departmentAdmin.id': 1 },
-  { unique: true, partialFilterExpression: { 'departmentAdmin.id': { $type: 'objectId' } } }
+  {
+    unique: true,
+    partialFilterExpression: { 'departmentAdmin.id': { $type: 'objectId' } },
+  },
 );
 
 const Department: Model<IDepartment> = cloudConnection.model<IDepartment>(

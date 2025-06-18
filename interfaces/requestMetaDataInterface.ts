@@ -14,7 +14,7 @@ import { Lookup } from 'geoip-lite';
 // }
 export interface IRequestMetaData {
   ip: string;
-  location?: Lookup;
+  location?: Lookup | undefined;
   device: {
     source: string;
     browser: string;

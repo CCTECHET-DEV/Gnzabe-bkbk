@@ -28,6 +28,8 @@ const auditLogSchema = new Schema<IAuditLog>(
         'ADD_EMPLOYEE',
         'ACTIVATE_DEPARTMENT',
         'DEACTIVATE_DEPARTMENT',
+        'APPROVE_EMPLOYEE',
+        'DISAPPROVE_EMPLOYEE',
       ],
     },
     departmentId: {
@@ -67,7 +69,7 @@ const auditLogSchema = new Schema<IAuditLog>(
         ll: {
           type: [Number],
           validate: {
-            validator: (arr: number[]) => arr.length === 2,
+            validator: (arr: number[]) => arr.length === 2 || !arr.length,
             message: 'll must be an array of two numbers',
           },
         },

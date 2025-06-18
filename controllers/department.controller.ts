@@ -297,7 +297,7 @@ export const deactiveDepartment = catchAsync(
     }
     department.isActive = false;
     await department.save({ validateBeforeSave: false });
-    await logAction(next, {
+    const error = await logAction(next, {
       performedBy: {
         id: req.company?._id as Types.ObjectId,
         name: req.company?.name,
@@ -309,6 +309,9 @@ export const deactiveDepartment = catchAsync(
       timeStamp: new Date(),
       requestMetadData: req.requestMetaData,
     });
+    if (error) {
+      return next(error);
+    }
     console.log('account deactivated');
     res.status(200).json({
       status: 'success',

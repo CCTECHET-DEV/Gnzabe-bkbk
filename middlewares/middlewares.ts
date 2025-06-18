@@ -88,11 +88,11 @@ export const attachRequestMeta = (
 export const allowedToCompanyOrDepartmentAdmin = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     let token;
-    const { id } = req.params;
-    if (!id) {
+    const { departmentId } = req.query;
+    if (!departmentId) {
       return next(new AppError('Department ID is required', 400));
     }
-    const department = await Department.findById(id);
+    const department = await Department.findById(departmentId);
 
     if (!department) return next(new AppError('Department not found', 404));
 
@@ -124,23 +124,20 @@ export const allowedToCompanyOrDepartmentAdmin = catchAsync(
       return next();
     }
 
-    const employee = await User.findById(decoded.id).select(
-      '+passwordChangedAt',
-    );
+    const admin = await User.findById(decoded.id).select('+passwordChangedAt');
 
-    if (employee) {
-      if (employee.passwordChangedAfter(decoded.iat))
+    if (admin) {
+      if (admin.passwordChangedAfter(decoded.iat))
         return next(
           new AppError('Password has been changed. Please login again!', 401),
         );
 
-      req.user = employee;
+      req.user = admin;
       const newToken = signToken(decoded.id, process.env.JWT_EXPIRES_IN_HOUR);
       res.cookie('jwt', newToken, cookieOptions(req));
-      if (employee.role === 'departmentAdmin') {
-        if (
-          department.departmentAdmin?.id.toString() !== employee.id.toString()
-        )
+      if (admin.role === 'departmentAdmin') {
+        console.log(department.departmentAdmin, admin);
+        if (department.departmentAdmin?.id?.toString() !== admin.id.toString())
           return next(
             new AppError(
               'Unauthorized action, You are not the department admin of this department!',
