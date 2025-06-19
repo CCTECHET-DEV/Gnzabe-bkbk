@@ -361,14 +361,23 @@ export const deactiveDepartment = catchAsync(
     if (error) {
       return next(error);
     }
+    // NOTE send notification to company account
     await sendNotification({
-      recipient: (req.company?._id as string) || (req.user?._id as string),
-      type: 'otp_verified',
+      recipient: department.companyId.toString(),
       title: 'Department Deactivated',
-      message: `You have successfully verified otp verification in at`,
+      type: 'departmentDeactivated',
+      message: `${department.name} has been deactivated successfully.`,
     });
+    // NOTE send notification to department admin
+    if (department.departmentAdmin?.id) {
+      await sendNotification({
+        recipient: department.departmentAdmin.id.toString(),
+        title: 'Department Deactivated',
+        type: 'departmentDeactivated',
+        message: `${department.name} has been deactivated successfully.`,
+      });
+    }
 
-    console.log('account deactivated');
     res.status(200).json({
       status: 'success',
       message: 'Department deactivated successfully',
@@ -406,14 +415,22 @@ export const activateDepartment = catchAsync(
     if (error) {
       return next(error);
     }
-
+    // NOTE send notification to company account
     await sendNotification({
-      recipient: (req.company?._id as string) || (req.user?._id as string),
-      type: 'otp_verified',
-      title: 'Department Deactivated',
+      recipient: department.companyId.toString(),
+      title: 'Department Activated',
+      type: 'departmentActivated',
       message: `You have successfully verified otp verification in at`,
     });
-
+    // NOTE send notification to department admin
+    if (department.departmentAdmin?.id) {
+      await sendNotification({
+        recipient: department.departmentAdmin.id.toString(),
+        title: 'Department Activated',
+        type: 'departmentActivated',
+        message: `Your department ${department.name} has been activated successfully.`,
+      });
+    }
     res.status(200).json({
       status: 'success',
       message: 'Department activated successfully',
