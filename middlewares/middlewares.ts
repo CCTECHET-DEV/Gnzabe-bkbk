@@ -80,7 +80,7 @@ export const attachRequestMeta = (
     },
   };
 
-  console.log(req.requestMetaData, ' Request Meta Data');
+  // console.log(req.requestMetaData, ' Request Meta Data');
 
   next();
 };

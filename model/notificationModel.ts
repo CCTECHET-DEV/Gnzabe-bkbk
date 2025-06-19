@@ -21,6 +21,7 @@ const notificationSchema = new Schema<INotification>({
       'courseAssignment',
       'progressReport',
       'custom',
+      '',
     ],
     required: true,
   },

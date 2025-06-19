@@ -15,6 +15,7 @@ import {
 import { generateOtp } from '../utilities/helper';
 import axios from 'axios';
 import Department from '../model/departmentModel';
+import { sendNotification } from '../services/notification.service';
 
 interface SignupControllerOptions {
   allowedFields?: string[];
@@ -260,7 +261,7 @@ const createLoginController = <T extends IAuthDocument>(
         document.incrementFailedLoginAttemptsMade();
         await document.save({ validateBeforeSave: false });
       }
-      console.log(document, Model, filter);
+      // console.log(document, Model, filter);
 
       return next(new AppError('Incorrect credentials', 401));
     }
@@ -308,6 +309,17 @@ const createLoginController = <T extends IAuthDocument>(
         document.otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
       }
       await document.save({ validateBeforeSave: false });
+
+      console.log('before send notification');
+      await sendNotification({
+        recipientId: document._id as string,
+        recipientModel: 'Company', // or 'User' if appropriate
+        type: 'custom',
+        title: 'Login Successful',
+        message: `You have successfully logged in at ${new Date().toLocaleString()}`,
+      });
+      console.log('after send notification');
+
       return res.status(200).json({
         status: 'success',
         message: `OTP sent to you via ${document.mfaBy} successfully`,
