@@ -91,24 +91,3 @@ export const markAllNotificationsAsRead = catchAsync(
     });
   },
 );
-
-// export const deleteNotification = catchAsync(
-//   async (req: Request, res: Response, next: NextFunction) => {
-//     const { id } = req.params;
-
-//     if (!id) {
-//       return next(new AppError('Notification ID is required', 400));
-//     }
-
-//     const notification = await Notification.findByIdAndDelete(id);
-
-//     if (!notification) {
-//       return next(new AppError('Notification not found', 404));
-//     }
-
-//     res.status(204).json({
-//       status: 'success',
-//       data: null,
-//     });
-//   },
-// );

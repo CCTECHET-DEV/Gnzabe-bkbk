@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import User from '../model/userModel'; // Adjust the path as necessary
 
 async function deleteOldUnverifiedUsers() {
