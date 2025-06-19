@@ -2,40 +2,46 @@ import { Schema, model, Types } from 'mongoose';
 import { INotification } from '../interfaces/notificationInterface';
 import { cloudConnection } from '../config/dbConfig';
 
-const notificationSchema = new Schema<INotification>({
-  recipient: {
-    type: Schema.Types.ObjectId,
-    required: true,
-    refPath: 'recipientModel',
+const notificationSchema = new Schema<INotification>(
+  {
+    recipient: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      refPath: 'recipientModel',
+    },
+    recipientModel: {
+      type: String,
+      required: true,
+      enum: ['User', 'Company'],
+    },
+    type: {
+      type: String,
+      enum: [
+        'registration',
+        'passwordReset',
+        'courseAssignment',
+        'progressReport',
+        'custom',
+        '',
+      ],
+      required: true,
+    },
+    title: String,
+    message: String,
+    isRead: {
+      type: Boolean,
+      default: false,
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
   },
-  recipientModel: {
-    type: String,
-    required: true,
-    enum: ['User', 'Company'],
+  {
+    toObject: { virtuals: true },
+    toJSON: { virtuals: true },
   },
-  type: {
-    type: String,
-    enum: [
-      'registration',
-      'passwordReset',
-      'courseAssignment',
-      'progressReport',
-      'custom',
-      '',
-    ],
-    required: true,
-  },
-  title: String,
-  message: String,
-  isRead: {
-    type: Boolean,
-    default: false,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+);
 
 const Notification = cloudConnection.model<INotification>(
   'Notification',
