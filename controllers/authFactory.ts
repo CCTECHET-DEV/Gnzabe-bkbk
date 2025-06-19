@@ -196,6 +196,13 @@ const createOtpVerificationController = <T extends IAuthDocument>(
     );
     res.cookie('jwt', accessToken, cookieOptions(req));
     // console.log('cookie set');
+    await sendNotification({
+      recipientId: document._id as string,
+      recipientModel: 'Company', // or 'User' if appropriate
+      type: 'otp_verified',
+      title: 'verified Successful',
+      message: `You have successfully verified otp verification in at`,
+    });
     res.status(200).json({
       status: 'success',
       message: 'OTP verified successfully',
@@ -314,7 +321,7 @@ const createLoginController = <T extends IAuthDocument>(
       await sendNotification({
         recipientId: document._id as string,
         recipientModel: 'Company', // or 'User' if appropriate
-        type: 'custom',
+        type: 'login',
         title: 'Login Successful',
         message: `You have successfully logged in at ${new Date().toLocaleString()}`,
       });
