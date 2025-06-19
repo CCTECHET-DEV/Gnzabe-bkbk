@@ -9,6 +9,7 @@ import User from '../model/userModel';
 import { createAuditLog } from './auditLog.controller';
 import { logAction } from '../utilities/auditLogger';
 import { timeStamp } from 'console';
+import { sendNotification } from '../services/notification.service';
 
 // export const getAllDepartments = dbFactory.getAll(Department);
 export const getDepartment = dbFactory.getOne(Department);
@@ -360,6 +361,14 @@ export const deactiveDepartment = catchAsync(
     if (error) {
       return next(error);
     }
+    await sendNotification({
+      recipientId: (req.company?._id as string) || (req.user?._id as string),
+      recipientModel: 'Company', // or 'User' if appropriate
+      type: 'otp_verified',
+      title: 'Department Deactivated',
+      message: `You have successfully verified otp verification in at`,
+    });
+
     console.log('account deactivated');
     res.status(200).json({
       status: 'success',
@@ -398,6 +407,14 @@ export const activateDepartment = catchAsync(
     if (error) {
       return next(error);
     }
+
+    await sendNotification({
+      recipientId: (req.company?._id as string) || (req.user?._id as string),
+      recipientModel: 'Company', // or 'User' if appropriate
+      type: 'otp_verified',
+      title: 'Department Deactivated',
+      message: `You have successfully verified otp verification in at`,
+    });
 
     res.status(200).json({
       status: 'success',
