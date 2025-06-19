@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from 'express';
 import Notification from '../model/notificationModel';
 import { catchAsync } from '../utilities/catchAsync';
 import { AppError } from '../utilities/appError';
-import { Document } from 'mongoose';
 
 export const getNotifications = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -19,7 +18,7 @@ export const getNotifications = catchAsync(
 
     const notifications = await Notification.find({
       recipient: id,
-      isRead: false,
+      // isRead: false,
     })
       .sort({
         createdAt: -1,

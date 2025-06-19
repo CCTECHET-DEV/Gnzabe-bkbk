@@ -1,8 +1,7 @@
 import Notification from '../model/notificationModel';
 
 interface SendNotificationParams {
-  recipientId: string;
-  recipientModel: 'User' | 'Company';
+  recipient: string;
   type: string;
   title: string;
   message: string;
@@ -10,16 +9,14 @@ interface SendNotificationParams {
 }
 
 export const sendNotification = async ({
-  recipientId,
-  recipientModel,
+  recipient,
   type,
   title,
   message,
   metadata = {},
 }: SendNotificationParams) => {
   const notif = await Notification.create({
-    recipient: recipientId,
-    recipientModel,
+    recipient,
     type,
     title,
     message,
@@ -27,5 +24,5 @@ export const sendNotification = async ({
   });
   console.log(notif, 'nifuuuaidhfkahfkahsfkhsadkfhasdkfhsadkfhsakfhksfhsakhk');
   // Emit to frontend via WebSocket (if connected)
-  io.to(recipientId.toString()).emit('new_notification', notif);
+  io.to(recipient.toString()).emit('new_notification', notif);
 };

@@ -197,8 +197,7 @@ const createOtpVerificationController = <T extends IAuthDocument>(
     res.cookie('jwt', accessToken, cookieOptions(req));
     // console.log('cookie set');
     await sendNotification({
-      recipientId: document._id as string,
-      recipientModel: 'Company', // or 'User' if appropriate
+      recipient: document._id as string,
       type: 'otp_verified',
       title: 'verified Successful',
       message: `You have successfully verified otp verification in at`,
@@ -317,16 +316,6 @@ const createLoginController = <T extends IAuthDocument>(
       }
       await document.save({ validateBeforeSave: false });
 
-      console.log('before send notification');
-      await sendNotification({
-        recipientId: document._id as string,
-        recipientModel: 'Company', // or 'User' if appropriate
-        type: 'login',
-        title: 'Login Successful',
-        message: `You have successfully logged in at ${new Date().toLocaleString()}`,
-      });
-      console.log('after send notification');
-
       return res.status(200).json({
         status: 'success',
         message: `OTP sent to you via ${document.mfaBy} successfully`,
@@ -340,10 +329,21 @@ const createLoginController = <T extends IAuthDocument>(
     // const refreshToken = signToken(userId);
     res.cookie('jwt', accessToken, cookieOptions(req));
     // res.cookie('refreshToken', refreshToken, cookieOptions(req));
-
-    res
-      .status(200)
-      .json({ status: 'success', accessToken, data: { document } });
+    console.log('before send notification');
+    await sendNotification({
+      recipient: document._id as string,
+      type: 'login',
+      title: 'Login Successful',
+      message: `You have successfully logged in at ${new Date().toLocaleString()}`,
+    });
+    console.log('after send notification');
+    res.status(200).json({
+      status: 'success',
+      accessToken,
+      data: {
+        document,
+      },
+    });
   });
 
 export const createResetLinkController = <T extends IAuthDocument>(

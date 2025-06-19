@@ -362,8 +362,7 @@ export const deactiveDepartment = catchAsync(
       return next(error);
     }
     await sendNotification({
-      recipientId: (req.company?._id as string) || (req.user?._id as string),
-      recipientModel: 'Company', // or 'User' if appropriate
+      recipient: (req.company?._id as string) || (req.user?._id as string),
       type: 'otp_verified',
       title: 'Department Deactivated',
       message: `You have successfully verified otp verification in at`,
@@ -409,8 +408,7 @@ export const activateDepartment = catchAsync(
     }
 
     await sendNotification({
-      recipientId: (req.company?._id as string) || (req.user?._id as string),
-      recipientModel: 'Company', // or 'User' if appropriate
+      recipient: (req.company?._id as string) || (req.user?._id as string),
       type: 'otp_verified',
       title: 'Department Deactivated',
       message: `You have successfully verified otp verification in at`,

@@ -7,13 +7,12 @@ const notificationSchema = new Schema<INotification>(
     recipient: {
       type: Schema.Types.ObjectId,
       required: true,
-      refPath: 'recipientModel',
     },
-    recipientModel: {
-      type: String,
-      required: true,
-      enum: ['User', 'Company'],
-    },
+    // recipientModel: {
+    //   type: String,
+    //   required: true,
+    //   enum: ['User', 'Company'],
+    // },
     type: {
       type: String,
       enum: [
