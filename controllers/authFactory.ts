@@ -68,6 +68,17 @@ const createSignupController = <T extends IAuthDocument>(
         document?.email,
         document?.fullName,
       );
+
+      await sendNotification({
+        recipient: department.departmentAdmin?.id?.toString(),
+        type: 'approvalRequest',
+        title: 'New Employee Approval Request',
+        message: `A new employee ${document.fullName} with an id of ${document.id} has signed up and is awaiting approval.`,
+        metadata: {
+          employeeId: document._id,
+          departmentId: department._id,
+        },
+      });
     }
 
     // // ✅ Create session

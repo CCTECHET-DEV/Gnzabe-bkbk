@@ -24,6 +24,7 @@ const notificationSchema = new Schema<INotification>(
         'login',
         'departmentDeactivated',
         'departmentActivated',
+        'approvalRequest',
       ],
       required: true,
     },

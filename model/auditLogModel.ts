@@ -108,5 +108,9 @@ const auditLogSchema = new Schema<IAuditLog>(
   { timestamps: true },
 );
 
+auditLogSchema.pre('updateOne', function () {
+  throw new Error('Audit logs cannot be updated');
+});
+
 const AuditLog = localConnection.model<IAuditLog>('auditLog', auditLogSchema);
 export default AuditLog;
