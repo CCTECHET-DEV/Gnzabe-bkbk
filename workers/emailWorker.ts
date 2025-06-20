@@ -22,6 +22,10 @@ import {
   approvalRequestSubject,
 } from '../views/email/approveEmployeeRequest';
 
+const connection = {
+  url: process.env.REDIS_URL || 'redis://localhost:6379',
+};
+
 const worker = new Worker(
   'emailQueue',
   async (job) => {
@@ -82,10 +86,7 @@ const worker = new Worker(
     return result;
   },
   {
-    connection: {
-      host: 'localhost',
-      port: 6379,
-    },
+    connection,
   },
 );
 export default worker;
