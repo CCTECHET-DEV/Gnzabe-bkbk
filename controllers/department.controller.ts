@@ -10,6 +10,8 @@ import { createAuditLog } from './auditLog.controller';
 import { logAction } from '../utilities/auditLogger';
 import { timeStamp } from 'console';
 import { sendNotification } from '../services/notification.service';
+import { clearCache, getOrSetCache } from '../services/redis/cache.service';
+import redisClient from '../services/redis/redis.service';
 
 // export const getAllDepartments = dbFactory.getAll(Department);
 export const getDepartment = dbFactory.getOne(Department);
@@ -128,6 +130,8 @@ export const assignDepartmentAdmin = catchAsync(
     if (error) {
       return next(error);
     }
+    await clearCache(`departments_${department.companyId}`);
+
     res.status(200).json({
       status: 'success',
       message: 'Department admin assigned successfully',
@@ -436,6 +440,32 @@ export const activateDepartment = catchAsync(
       message: 'Department activated successfully',
       data: {
         document: department,
+      },
+    });
+  },
+);
+
+export const getAllDepartments = catchAsync(
+  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { key } = req.query;
+    const company = req.company;
+    if (!company) {
+      return next(new AppError('Company not found', 404));
+    }
+
+    const departments = await Department.find({
+      companyId: req.company?._id,
+    }).lean();
+
+    if (key && typeof key === 'string')
+      await redisClient.set(key, JSON.stringify(departments), {
+        EX: 300,
+      });
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        departments,
       },
     });
   },

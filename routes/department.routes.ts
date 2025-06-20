@@ -5,6 +5,7 @@ import {
   assignDepartmentAdmin,
   createDepartment,
   deactiveDepartment,
+  getAllDepartments,
   getDepartment,
   removeEmployeeFromDepartment,
   revokeDepartmentAdmin,
@@ -15,6 +16,7 @@ import {
   allowedToCompanyOrDepartmentAdmin,
   doesDepartmentBelongToCompany,
 } from '../middlewares/middlewares';
+import { cachedMiddleware } from '../middlewares/cache.middlware';
 
 const router = express.Router();
 
@@ -25,7 +27,10 @@ router
 // router.use()
 // router.use(allowedToCompanyOrDepartmentAdmin)
 router.use(protectCompany);
-router.route('/').post(addCompanyIdToRequest, createDepartment);
+router
+  .route('/')
+  .get(cachedMiddleware, getAllDepartments)
+  .post(addCompanyIdToRequest, createDepartment);
 router.route('/add-employee').post(addEmployeeToDepartment);
 router.route('/assign-admin').post(assignDepartmentAdmin);
 router.route('/revoke-admin').post(revokeDepartmentAdmin);

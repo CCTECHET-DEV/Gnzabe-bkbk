@@ -34,6 +34,7 @@
     "node-cron": "^4.0.7",
     "nodemon": "^3.1.9",
     "otp-generator": "^4.0.1",
+    "redis": "^5.5.6",
     "sharp": "^0.34.1",
     "slugify": "^1.6.6",
     "socket.io": "^4.8.1",
