@@ -1,25 +1,7 @@
 import { Request } from 'express';
 import * as brevo from '@getbrevo/brevo';
-import {
-  verifySubject,
-  verifyContent,
-  verifySender,
-} from '../views/email/verifyEmaiil';
 import { removeLastPathSegment } from '../utilities/helper';
-import {
-  verifyOtpByEmailContent,
-  verifyOtpByEmailSender,
-  verifyOtpByEmailSubject,
-} from '../views/email/sendOTPEmail';
-import {
-  resetPasswordContent,
-  resetPasswordSender,
-  resetPasswordSubject,
-} from '../views/email/passwordResetEmail';
 import { emailQueue } from './queues/emailQueues.service';
-import { url } from 'inspector';
-
-// console.log(brevo, 'brevo');
 
 export class EmailSender {
   subject: string;
@@ -73,31 +55,6 @@ export class EmailSender {
   }
 }
 
-// export const sendVerificationEmail = async (
-//   req: Request,
-//   email: string,
-//   id: string,
-//   token: string,
-//   name?: string,
-// ): Promise<void> => {
-//   const protocol = req.protocol; // 'http' or 'https'
-//   const host = req.get('host'); // 'localhost:3000' or 'yourdomain.com'
-//   const baseUrl = `${protocol}://${host}${removeLastPathSegment(req.originalUrl)}`;
-//   const verificationUrl = `${baseUrl}/verify?token=${token}&id=${id}`;
-
-//   console.log(verificationUrl, 'verificationUrl');
-//   // const token = encodeURIComponent(userId);
-//   const mailer = new EmailSender({
-//     subject: verifySubject,
-//     sender: verifySender,
-//     htmlContent: verifyContent(verificationUrl),
-//     to: [{ email, name }],
-//   });
-
-//   await mailer.send();
-//   console.log('Verification email sent to:', email);
-// };
-
 export const queueVerificationEmail = async (
   req: Request,
   email: string,
@@ -141,22 +98,6 @@ export const queuePasswordResetEmail = async (
     },
   });
 };
-
-// export const sendOtpEmail = async (
-//   email: string,
-//   otp: string,
-//   name?: string,
-// ): Promise<void> => {
-//   const mailer = new EmailSender({
-//     subject: verifyOtpByEmailSubject,
-//     sender: verifyOtpByEmailSender,
-//     htmlContent: verifyOtpByEmailContent(otp),
-//     to: [{ email, name }],
-//   });
-
-//   await mailer.send();
-//   console.log('OTP has been sent to email: ', email);
-// };
 
 export const queueOtpEmail = async (
   email: string,
