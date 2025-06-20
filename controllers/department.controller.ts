@@ -9,6 +9,7 @@ import { logAction } from '../utilities/auditLogger';
 import { sendNotification } from '../services/notification.service';
 import redisClient from '../services/redis/redis.service';
 import { clearCache } from '../services/redis/cache.service';
+import RedisClient from '../services/redis/redis.service';
 
 // export const getAllDepartments = dbFactory.getAll(Department);
 export const getDepartment = dbFactory.getOne(Department);
@@ -454,11 +455,13 @@ export const getAllDepartments = catchAsync(
       companyId: req.company?._id,
     }).lean();
 
-    if (key && typeof key === 'string')
+    if (key && typeof key === 'string') {
+      const redisInstance = await RedisClient.getInstance();
+      const redisClient = redisInstance.getClient();
       await redisClient.set(key, JSON.stringify(departments), {
         EX: 300,
       });
-
+    }
     res.status(200).json({
       status: 'success',
       data: {

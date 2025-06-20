@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import redisClient from '../services/redis/redis.service';
-import { stat } from 'fs';
 import { catchAsync } from '../utilities/catchAsync';
+import RedisClient from '../services/redis/redis.service';
 
 // export const cacheMiddleware1 = (
 //   keyGenerator: (req: Request) => string,
@@ -31,6 +30,9 @@ export const cachedMiddleware = catchAsync(
     console.log('Cache middleware triggered for:', req.originalUrl);
     const { key } = req.query;
     if (!key || typeof key !== 'string') return next();
+
+    const redisInstance = await RedisClient.getInstance();
+    const redisClient = redisInstance.getClient();
 
     const documents = await redisClient.get(key);
     if (documents)
