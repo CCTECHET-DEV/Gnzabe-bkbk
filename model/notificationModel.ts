@@ -25,6 +25,7 @@ const notificationSchema = new Schema<INotification>(
         'departmentDeactivated',
         'departmentActivated',
         'approvalRequest',
+        'opt_verification',
       ],
       required: true,
     },

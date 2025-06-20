@@ -207,7 +207,7 @@ const createOtpVerificationController = <T extends IAuthDocument>(
     // console.log('cookie set');
     await sendNotification({
       recipient: document._id as string,
-      type: 'otp_verified',
+      type: 'opt_verification',
       title: 'verified Successful',
       message: `You have successfully verified otp verification in at`,
     });
