@@ -3,15 +3,12 @@ import dbFactory from '../dbOperations/dbFactory';
 import { catchAsync } from '../utilities/catchAsync';
 import { AppError } from '../utilities/appError';
 import { Request, Response, NextFunction } from 'express';
-import Company from '../model/companyModel';
 import { Types } from 'mongoose';
 import User from '../model/userModel';
-import { createAuditLog } from './auditLog.controller';
 import { logAction } from '../utilities/auditLogger';
-import { timeStamp } from 'console';
 import { sendNotification } from '../services/notification.service';
-import { clearCache, getOrSetCache } from '../services/redis/cache.service';
 import redisClient from '../services/redis/redis.service';
+import { clearCache } from '../services/redis/cache.service';
 
 // export const getAllDepartments = dbFactory.getAll(Department);
 export const getDepartment = dbFactory.getOne(Department);

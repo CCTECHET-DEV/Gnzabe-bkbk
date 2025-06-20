@@ -1,4 +1,4 @@
-// import redisClient from './redis.service';
+import redisClient from './redis.service';
 
 // export const getOrSetCache = async <T>(
 //   key: string,
@@ -19,10 +19,10 @@
 //   }
 // };
 
-// export const clearCache = async (key: string): Promise<void> => {
-//   try {
-//     await redisClient.del(key);
-//   } catch (error) {
-//     console.error('🔴 Redis cache clear error:', error);
-//   }
-// };
+export const clearCache = async (key: string): Promise<void> => {
+  try {
+    await redisClient.del(key);
+  } catch (error) {
+    console.error('🔴 Redis cache clear error:', error);
+  }
+};
