@@ -1,6 +1,5 @@
 import { IUser } from '../interfaces/userInterface';
 import User from '../model/userModel';
-import { sendOtpEmail, sendVerificationEmail } from '../services/email.service';
 import authFactory from './authFactory';
 
 export const signupUser = authFactory.createSignupController<IUser>(User, {

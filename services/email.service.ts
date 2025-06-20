@@ -16,11 +16,8 @@ import {
   resetPasswordSender,
   resetPasswordSubject,
 } from '../views/email/passwordResetEmail';
-import {
-  approvalRequestContent,
-  approvalRequestSender,
-  approvalRequestSubject,
-} from '../views/email/approveEmployeeRequest';
+import { emailQueue } from './queues/emailQueues.service';
+import { url } from 'inspector';
 
 // console.log(brevo, 'brevo');
 
@@ -76,7 +73,32 @@ export class EmailSender {
   }
 }
 
-export const sendVerificationEmail = async (
+// export const sendVerificationEmail = async (
+//   req: Request,
+//   email: string,
+//   id: string,
+//   token: string,
+//   name?: string,
+// ): Promise<void> => {
+//   const protocol = req.protocol; // 'http' or 'https'
+//   const host = req.get('host'); // 'localhost:3000' or 'yourdomain.com'
+//   const baseUrl = `${protocol}://${host}${removeLastPathSegment(req.originalUrl)}`;
+//   const verificationUrl = `${baseUrl}/verify?token=${token}&id=${id}`;
+
+//   console.log(verificationUrl, 'verificationUrl');
+//   // const token = encodeURIComponent(userId);
+//   const mailer = new EmailSender({
+//     subject: verifySubject,
+//     sender: verifySender,
+//     htmlContent: verifyContent(verificationUrl),
+//     to: [{ email, name }],
+//   });
+
+//   await mailer.send();
+//   console.log('Verification email sent to:', email);
+// };
+
+export const queueVerificationEmail = async (
   req: Request,
   email: string,
   id: string,
@@ -87,74 +109,83 @@ export const sendVerificationEmail = async (
   const host = req.get('host'); // 'localhost:3000' or 'yourdomain.com'
   const baseUrl = `${protocol}://${host}${removeLastPathSegment(req.originalUrl)}`;
   const verificationUrl = `${baseUrl}/verify?token=${token}&id=${id}`;
-
   console.log(verificationUrl, 'verificationUrl');
-  // const token = encodeURIComponent(userId);
-  const mailer = new EmailSender({
-    subject: verifySubject,
-    sender: verifySender,
-    htmlContent: verifyContent(verificationUrl),
-    to: [{ email, name }],
+  await emailQueue.add('sendVerificationEmail', {
+    type: 'verify',
+    to: {
+      email,
+      name,
+    },
+    url: verificationUrl,
   });
-
-  await mailer.send();
-  console.log('Verification email sent to:', email);
 };
-export const sendPasswordResetEmail = async (
-  req: Request,
+
+export const queuePasswordResetEmail = async (
   email: string,
   id: string,
   token: string,
   name?: string,
 ): Promise<void> => {
-  const protocol = req.protocol; // 'http' or 'https'
-  const host = req.get('host'); // 'localhost:3000' or 'yourdomain.com'
-  const baseUrl = `${protocol}://${host}${removeLastPathSegment(req.originalUrl)}`;
-  // const resetUrl = `${baseUrl}/reset-password?token=${token}&id=${id}`;
   const resetFrontendUrl = `${process.env.PASSWORD_RESET_FRONTEND_URL}?token=${token}&id=${id}`;
-
   console.log(resetFrontendUrl, 'resetUrl');
-  // const token = encodeURIComponent(userId);
-  const mailer = new EmailSender({
-    subject: resetPasswordSubject,
-    sender: resetPasswordSender,
-    htmlContent: resetPasswordContent(resetFrontendUrl),
-    to: [{ email, name }],
+  await emailQueue.add('sendPasswordResetEmail', {
+    type: 'reset',
+    email,
+    id,
+    token,
+    name,
+    url: resetFrontendUrl,
+    to: {
+      email,
+      name,
+    },
   });
-
-  await mailer.send();
-  console.log('Password reset email sent to:', email);
 };
 
-export const sendOtpEmail = async (
+// export const sendOtpEmail = async (
+//   email: string,
+//   otp: string,
+//   name?: string,
+// ): Promise<void> => {
+//   const mailer = new EmailSender({
+//     subject: verifyOtpByEmailSubject,
+//     sender: verifyOtpByEmailSender,
+//     htmlContent: verifyOtpByEmailContent(otp),
+//     to: [{ email, name }],
+//   });
+
+//   await mailer.send();
+//   console.log('OTP has been sent to email: ', email);
+// };
+
+export const queueOtpEmail = async (
   email: string,
   otp: string,
   name?: string,
 ): Promise<void> => {
-  const mailer = new EmailSender({
-    subject: verifyOtpByEmailSubject,
-    sender: verifyOtpByEmailSender,
-    htmlContent: verifyOtpByEmailContent(otp),
-    to: [{ email, name }],
+  await emailQueue.add('sendOtpEmail', {
+    type: 'otp',
+    to: {
+      email,
+      name,
+    },
+    otp,
   });
-
-  await mailer.send();
-  console.log('OTP has been sent to email: ', email);
 };
 
-export const sendEmailApprovalRequest = async (
+export const queueApprovalRequestEmail = async (
   departmentAdminName: string,
   departmentAdminEmail: string,
   employeeEmail: string,
   employeeName: string,
-): Promise<void> => {
-  const mailer = new EmailSender({
-    subject: approvalRequestSubject,
-    sender: approvalRequestSender,
-    htmlContent: approvalRequestContent(departmentAdminName, employeeEmail),
-    to: [{ name: employeeName, email: departmentAdminEmail }],
+) => {
+  await emailQueue.add('sendApprovalRequestEmail', {
+    type: 'approval',
+    departmentAdminName,
+    employeeEmail,
+    employeeName,
+    to: {
+      email: departmentAdminEmail,
+    },
   });
-
-  await mailer.send();
-  console.log('Approval request email sent to:', departmentAdminEmail);
 };

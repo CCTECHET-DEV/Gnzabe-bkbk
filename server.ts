@@ -5,6 +5,7 @@ dotenv.config({
 });
 import connectToDatabase from './config/dbConfig';
 import { Server } from 'socket.io';
+import EmailWorker from './workers/emailWorker';
 
 declare global {
   // Add the io property to globalThis
@@ -64,6 +65,14 @@ let server: http.Server;
   setupCronJobs();
   watchUserChanges();
   watchDepartmentChanges();
+
+  EmailWorker.on('completed', (job) => {
+    console.log(`Job ${job.id} completed!`);
+  });
+
+  EmailWorker.on('failed', (job, err) => {
+    console.error(`Job ${job?.id} failed:`, err);
+  });
 
   server.listen(process.env.PORT!, () => {
     console.log(`server is running on port ${process.env.PORT}`);

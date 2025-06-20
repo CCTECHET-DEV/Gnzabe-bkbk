@@ -7,10 +7,10 @@ import { catchAsync } from '../utilities/catchAsync';
 import { Model } from 'mongoose';
 import { IAuthDocument } from '../interfaces/authInterface';
 import {
-  sendEmailApprovalRequest,
-  sendOtpEmail,
-  sendPasswordResetEmail,
-  sendVerificationEmail,
+  queueApprovalRequestEmail,
+  queueOtpEmail,
+  queuePasswordResetEmail,
+  queueVerificationEmail,
 } from '../services/email.service';
 import { generateOtp } from '../utilities/helper';
 import axios from 'axios';
@@ -62,7 +62,7 @@ const createSignupController = <T extends IAuthDocument>(
     // console.log('after push');
 
     if (department?.departmentAdmin?.email) {
-      await sendEmailApprovalRequest(
+      await queueApprovalRequestEmail(
         department.departmentAdmin?.name,
         department.departmentAdmin?.email,
         document?.email,
@@ -92,43 +92,41 @@ const createSignupController = <T extends IAuthDocument>(
     const userId = (document._id as string).toString();
     const accessToken = signToken(userId, process.env.JWT_EXPIRES_IN_HOUR);
 
-    if (sendVerificationEmail) {
-      const email = (document as any)[options.emailField];
-      const name = options.nameField
-        ? (document as any)[options.nameField]
-        : undefined;
+    const email = (document as any)[options.emailField];
+    const name = options.nameField
+      ? (document as any)[options.nameField]
+      : undefined;
 
-      await sendVerificationEmail(
-        req,
-        email,
-        (document._id as string).toString(),
-        verificationToken,
-        name,
-      );
-      document.verificationToken = undefined;
-      document.verificationTokenExpiry = undefined;
+    await queueVerificationEmail(
+      req,
+      email,
+      (document._id as string).toString(),
+      verificationToken,
+      name,
+    );
+    document.verificationToken = undefined;
+    document.verificationTokenExpiry = undefined;
 
-      return res.status(201).json({
-        status: 'success',
-        token: accessToken,
-        message: 'Signup successful! Please verify your email.',
-        data: {
-          document,
-        },
-      });
-    }
-
-    // const refreshToken = signToken(userId);
-    res.cookie('jwt', accessToken, cookieOptions(req));
-    // res.cookie('refreshToken', refreshToken, cookieOptions(req));
-
-    res.status(201).json({
+    return res.status(201).json({
       status: 'success',
       token: accessToken,
+      message: 'Signup successful! Please verify your email.',
       data: {
         document,
       },
     });
+
+    // // const refreshToken = signToken(userId);
+    // res.cookie('jwt', accessToken, cookieOptions(req));
+    // // res.cookie('refreshToken', refreshToken, cookieOptions(req));
+
+    // res.status(201).json({
+    //   status: 'success',
+    //   token: accessToken,
+    //   data: {
+    //     document,
+    //   },
+    // });
   });
 
 const createVerificationController = <T extends IAuthDocument>(
@@ -153,7 +151,7 @@ const createVerificationController = <T extends IAuthDocument>(
     if (document.verificationTokenExpiry!.getTime() < Date.now()) {
       const newToken = document.createVerificationToken();
       await document.save({ validateBeforeSave: false });
-      await sendVerificationEmail(
+      await queueVerificationEmail(
         req,
         document.email || document.primaryEmail,
         id,
@@ -303,7 +301,7 @@ const createLoginController = <T extends IAuthDocument>(
         const otp = generateOtp();
         document.otp = otp;
         document.otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
-        await sendOtpEmail(
+        await queueOtpEmail(
           document.email || document.primaryEmail,
           otp,
           document.fullName || document.name,
@@ -381,8 +379,7 @@ export const createResetLinkController = <T extends IAuthDocument>(
     const resetToken = document.createPasswordResetToken();
     await document.save({ validateBeforeSave: false });
 
-    await sendPasswordResetEmail(
-      req,
+    await queuePasswordResetEmail(
       document[emailField as keyof typeof document] as string,
       (document._id as string).toString(),
       resetToken,
